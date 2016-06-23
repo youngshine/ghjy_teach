@@ -17,8 +17,19 @@ Ext.application({
         'Ext.MessageBox'
     ],
 
+	dataUrl: 'http://www.xzpt.org/app/teacher/script/', //服务端,全局变量大写???
+	
+	/*
     views: [
-        'Main'
+        'Login'
+    ], */
+	controllers: [
+		'Main','Teach' 
+		// Main控制器包含处理登录
+		//teach includes zsd,student,topic
+	],
+    stores: [
+    	'School','Zsd','Student','Topic-teach','Topic-test','Study-photos'
     ],
 
     icon: {
@@ -41,21 +52,9 @@ Ext.application({
 
     launch: function() {
         // Destroy the #appLoadingIndicator element
-        Ext.fly('appLoadingIndicator').destroy();
+        //Ext.fly('appLoadingIndicator').destroy();
 
         // Initialize the main view
-        Ext.Viewport.add(Ext.create('Youngshine.view.Main'));
+        //Ext.Viewport.add(Ext.create('Youngshine.view.Login'));
     },
-
-    onUpdated: function() {
-        Ext.Msg.confirm(
-            "Application Update",
-            "This application has just successfully been updated to the latest version. Reload now?",
-            function(buttonId) {
-                if (buttonId === 'yes') {
-                    window.location.reload();
-                }
-            }
-        );
-    }
 });
