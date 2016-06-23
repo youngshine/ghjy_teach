@@ -1,0 +1,35 @@
+<!DOCTYPE HTML>
+<html manifest="" lang="en-US">
+<head>
+    <meta charset="UTF-8">
+    <title>根号教师PAD</title>
+    <style type="text/css">
+         /**
+         * Example of an initial loading indicator.
+         * It is recommended to keep this as minimal as possible to provide instant feedback
+         * while other resources are still being loaded for the first time
+         */
+        html, body {
+            height: 100%;
+            background-color: #fff
+        }
+		#appLoadingIndicator {
+			clear: both; 
+			display: block; 
+			margin:30% auto;
+			with:180px;
+			height:120px;
+		}
+    </style>
+    <!-- The line below must be kept intact for Sencha Command to build your application -->
+    <script id="microloader" type="text/javascript" src=".sencha/app/microloader/development.js"></script>
+	
+	<!-- pdf file -->
+    <script src="resources/pdf/compatibility.js"></script>
+    <script src="resources/pdf/pdf.js"></script>
+</head>
+<body>
+	<img id="appLoadingIndicator" src="resources/images/load.gif" />
+
+</body>
+</html>
