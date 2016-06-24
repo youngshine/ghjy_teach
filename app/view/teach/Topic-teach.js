@@ -28,12 +28,12 @@ Ext.define('Youngshine.view.teach.Topic-teach', {
 			items: [{
 				ui : 'back',
 				action: 'back',
-				text : '学生列表',
+				text : '课时列表',
 				//iconCls: 'team',
 				handler: function(){
 					//var view = Youngshine.app.getController('Teach').getStudent();
 					//Ext.Viewport.add(view);	
-					this.up('list').onStudent() //返回
+					this.up('list').onCourse() //返回
 				}
 			},{
 				xtype: 'spacer'
@@ -51,8 +51,10 @@ Ext.define('Youngshine.view.teach.Topic-teach', {
 			xtype: 'label',
 			docked: 'top',
 			html: '<span class="fetch">＋添加练习题</span>'+
-				'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;｜&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'+
-				'<span class="photo">上传教学笔记</span>',
+				'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'+
+				'<span class="photo">上传教学笔记</span>' + 
+				'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'+
+				'<span class="pdf">PDF教案</span>',
 			//itemId: 'zsd',
 			style: 'text-align:center;color:green;margin:10px;'
 /*		},{
@@ -121,6 +123,11 @@ Ext.define('Youngshine.view.teach.Topic-teach', {
 			delegate: 'span.photo',
 			event: 'tap',
 			fn: 'onPhoto'	
+		},{
+			element: 'element',
+			delegate: 'span.pdf',
+			event: 'tap',
+			fn: 'onPDF'
 		}],
 		
 		record: null //保存list选择的父表记录信息
@@ -186,9 +193,14 @@ Ext.define('Youngshine.view.teach.Topic-teach', {
 		
 
 	},
-	// 返回显示学生列表
-	onStudent: function(){
-		this.fireEvent('student')
+	// 返回
+	onCourse: function(){
+		this.fireEvent('course')
+	},
+	
+	onPDF: function(){
+		var me = this;
+		me.fireEvent('pdf',me.getRecord())
 	},
 	
 	// 拍照教学过程

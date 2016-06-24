@@ -60,7 +60,7 @@ Ext.define('Youngshine.controller.Main', {
 					
 					// 跳转页面：选择当堂课教授知识点列表
 					//me.showZsd(result.data.teacherID);
-					me.getApplication().getController('Teach').showZsd(result.data.teacherID);
+					me.getApplication().getController('Teach').showCourse(result.data.teacherID);
 					Ext.Viewport.remove(me.getLogin(),true); // dom remove myself
 					//Ext.Viewport.setActiveItem(Ext.create('Youngshine.view.teach.Zsd'));  					
 				}else{

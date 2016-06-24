@@ -619,6 +619,17 @@ Ext.ClassManager.addNameAlternateMappings({
   "Ext.layout.wrapper.BoxDock": [],
   "Ext.layout.wrapper.Dock": [],
   "Ext.layout.wrapper.Inner": [],
+  "Ext.log.Base": [],
+  "Ext.log.Logger": [],
+  "Ext.log.filter.Filter": [],
+  "Ext.log.filter.Priority": [],
+  "Ext.log.formatter.Default": [],
+  "Ext.log.formatter.Formatter": [],
+  "Ext.log.formatter.Identity": [],
+  "Ext.log.writer.Console": [],
+  "Ext.log.writer.DocumentTitle": [],
+  "Ext.log.writer.Remote": [],
+  "Ext.log.writer.Writer": [],
   "Ext.mixin.Bindable": [],
   "Ext.mixin.Filterable": [],
   "Ext.mixin.Mixin": [],
@@ -743,7 +754,34 @@ Ext.ClassManager.addNameAlternateMappings({
   "Ext.viewport.WindowsPhone": [
     "Ext.viewport.WP"
   ],
-  "Youngshine.view.Main": []
+  "Youngshine.controller.Main": [],
+  "Youngshine.controller.Teach": [],
+  "Youngshine.model.Course": [],
+  "Youngshine.model.School": [],
+  "Youngshine.model.Student": [],
+  "Youngshine.model.Study-photos": [],
+  "Youngshine.model.Topic-teach": [],
+  "Youngshine.model.Topic-test": [],
+  "Youngshine.model.Zsd": [],
+  "Youngshine.store.Course": [],
+  "Youngshine.store.School": [],
+  "Youngshine.store.Student": [],
+  "Youngshine.store.Study-photos": [],
+  "Youngshine.store.Topic-teach": [],
+  "Youngshine.store.Topic-test": [],
+  "Youngshine.store.Zsd": [],
+  "Youngshine.view.Login": [],
+  "Youngshine.view.teach.Course": [],
+  "Youngshine.view.teach.ImageViewer": [],
+  "Youngshine.view.teach.Pdf-file": [],
+  "Youngshine.view.teach.Student": [],
+  "Youngshine.view.teach.Topic-teach": [],
+  "Youngshine.view.teach.Topic-teach-photos": [],
+  "Youngshine.view.teach.Topic-teach-show": [],
+  "Youngshine.view.teach.Topic-teach-test": [],
+  "Youngshine.view.teach.Zoom": [],
+  "Youngshine.view.teach.Zsd": [],
+  "Youngshine.view.teach.pdf.PDF": []
 });
 Ext.ClassManager.addNameAliasMappings({
   "Ext.AbstractComponent": [],
@@ -1547,6 +1585,17 @@ Ext.ClassManager.addNameAliasMappings({
   "Ext.layout.wrapper.BoxDock": [],
   "Ext.layout.wrapper.Dock": [],
   "Ext.layout.wrapper.Inner": [],
+  "Ext.log.Base": [],
+  "Ext.log.Logger": [],
+  "Ext.log.filter.Filter": [],
+  "Ext.log.filter.Priority": [],
+  "Ext.log.formatter.Default": [],
+  "Ext.log.formatter.Formatter": [],
+  "Ext.log.formatter.Identity": [],
+  "Ext.log.writer.Console": [],
+  "Ext.log.writer.DocumentTitle": [],
+  "Ext.log.writer.Remote": [],
+  "Ext.log.writer.Writer": [],
   "Ext.mixin.Bindable": [],
   "Ext.mixin.Filterable": [],
   "Ext.mixin.Mixin": [],
@@ -1687,7 +1736,56 @@ Ext.ClassManager.addNameAliasMappings({
   "Ext.viewport.Ios": [],
   "Ext.viewport.Viewport": [],
   "Ext.viewport.WindowsPhone": [],
-  "Youngshine.view.Main": [
-    "widget.main"
+  "Youngshine.controller.Main": [],
+  "Youngshine.controller.Teach": [],
+  "Youngshine.model.Course": [],
+  "Youngshine.model.School": [],
+  "Youngshine.model.Student": [],
+  "Youngshine.model.Study-photos": [],
+  "Youngshine.model.Topic-teach": [],
+  "Youngshine.model.Topic-test": [],
+  "Youngshine.model.Zsd": [],
+  "Youngshine.store.Course": [],
+  "Youngshine.store.School": [],
+  "Youngshine.store.Student": [],
+  "Youngshine.store.Study-photos": [],
+  "Youngshine.store.Topic-teach": [],
+  "Youngshine.store.Topic-test": [],
+  "Youngshine.store.Zsd": [],
+  "Youngshine.view.Login": [
+    "widget.login"
+  ],
+  "Youngshine.view.teach.Course": [
+    "widget.course"
+  ],
+  "Youngshine.view.teach.ImageViewer": [
+    "widget.imageviewer"
+  ],
+  "Youngshine.view.teach.Pdf-file": [
+    "widget.pdf-file"
+  ],
+  "Youngshine.view.teach.Student": [
+    "widget.student"
+  ],
+  "Youngshine.view.teach.Topic-teach": [
+    "widget.topic-teach"
+  ],
+  "Youngshine.view.teach.Topic-teach-photos": [
+    "widget.topic-teach-photos"
+  ],
+  "Youngshine.view.teach.Topic-teach-show": [
+    "widget.topic-teach-show"
+  ],
+  "Youngshine.view.teach.Topic-teach-test": [
+    "widget.topic-teach-test"
+  ],
+  "Youngshine.view.teach.Zoom": [
+    "widget.imagezoom"
+  ],
+  "Youngshine.view.teach.Zsd": [
+    "widget.zsd"
+  ],
+  "Youngshine.view.teach.pdf.PDF": [
+    "widget.pdfpanel"
   ]
 });

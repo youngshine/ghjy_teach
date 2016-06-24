@@ -4,7 +4,8 @@ Ext.define('Youngshine.controller.Teach', {
 
     config: {
         refs: {
-           	zsd: 'zsd',
+           	zsd: 'course',
+			zsd: 'zsd',
 			student: 'student',
 			topicteach: 'topic-teach',
 			topicteachshow: 'topic-teach-show',
@@ -12,9 +13,9 @@ Ext.define('Youngshine.controller.Teach', {
 			topicteachtest: 'topic-teach-test',
         },
         control: {
-			zsd: {
+			course: {
 				//select: 'zsdSelect', //itemtap
-				itemtap: 'zsdItemtap', 
+				itemtap: 'courseItemtap', 
 				//zsdDone: 'zsdDone'
 			},
 			student: {
@@ -24,10 +25,11 @@ Ext.define('Youngshine.controller.Teach', {
 			},
 			topicteach: {
 				fetchTopic: 'topicteachFetch',//抓取自适应考题 
-				student: 'topicteachStudent', //返回学生列表
+				course: 'topicteachCourse', //返回学生列表
 				photos: 'topicteachPhotos', //该学生该知识点教学过程
 				test: 'topicteachTest', //昨对10题，考试给家长看
 				pass: 'topicteachPass', //通过学习，不能再操作
+				pdf: 'topicteachPDF',
 				itemtap: 'topicteachItemtap',
 			},
 			topicteachshow: {
@@ -46,7 +48,7 @@ Ext.define('Youngshine.controller.Teach', {
     },
 
 	// 登录后跳转这里 teaching zsd list of a particular teacher
-	showZsd: function(teacherID){
+	showCourse: function(teacherID){
 		var me = this;
 		
 		Ext.Viewport.setMasked({xtype:'loadmask',message:'正在加载'});
@@ -54,23 +56,23 @@ Ext.define('Youngshine.controller.Teach', {
 		var obj = {
 			"teacherID": teacherID
 		}
-		var store = Ext.getStore('Zsd'); 
+		var store = Ext.getStore('Course'); 
 		store.getProxy().setUrl(this.getApplication().dataUrl + 
-			'readZsdList.php?data='+JSON.stringify(obj) );
+			'readCourseList.php?data='+JSON.stringify(obj) );
 		store.load({ //异步async
 			callback: function(records, operation, success){
 				if (success){
-    				//console.log(records[0].data);
+    				console.log(records);
 					//me.showSearch();
 					Ext.Viewport.setMasked(false);
 					
 					// 跳转页面：选择当堂课教授知识点列表
 					//Ext.Viewport.remove(me.getLogin(),true); // dom remove myself
 					
-					me.zsd = Ext.create('Youngshine.view.teach.Zsd')
-					me.zsd.down('label[itemId=teacher]').setHtml(localStorage.teacherName)	
+					me.course = Ext.create('Youngshine.view.teach.Course')
+					me.course.down('label[itemId=teacher]').setHtml(localStorage.teacherName)	
 					//viewport.setActiveItem()
-					Ext.Viewport.add(me.zsd);
+					Ext.Viewport.add(me.course);
 				}else{
 					me.alertMsg('服务请求失败',3000)
 				};
@@ -132,9 +134,9 @@ Ext.define('Youngshine.controller.Teach', {
 		}
 		Ext.Viewport.setActiveItem(me.zsd)
 	},
-	studentPDF: function(rec){
-		
-		console.log(rec)
+	
+	topicteachPDF: function(rec){		
+		console.log(rec);
 		var pdffile = '';
 		if(rec.data.subjectID==1){
 			pdffile = '../PDF/sx/'
@@ -152,7 +154,7 @@ Ext.define('Youngshine.controller.Teach', {
 		Ext.Viewport.setActiveItem(view);
 	},
 	
-	studentItemtap: function( list, index, target, record, e, eOpts )	{
+	courseItemtap: function( list, index, target, record, e, eOpts )	{
     	var me = this; 
 		console.log(record.data)
 		//list.down('button[action=done]').enable();
@@ -206,15 +208,15 @@ Ext.define('Youngshine.controller.Teach', {
 	},
 
 	// 返回选择学生，store不变
-	topicteachStudent: function(win){		
+	topicteachCourse: function(win){		
 		var me = this;
-		if(!me.student){
-			me.student = Ext.create('Youngshine.view.teach.Student')
-			Ext.Viewport.add(me.student)
+		if(!me.course){
+			me.course = Ext.create('Youngshine.view.teach.Course')
+			Ext.Viewport.add(me.course)
 		}
-		me.student.down('button[action=zsd]').setHidden(true); //disable(不能再返回选择知识点
-		me.student.down('button[action=quit]').setHidden(false); //退出app
-		Ext.Viewport.setActiveItem(me.student)
+		//me.student.down('button[action=zsd]').setHidden(true); //disable(不能再返回选择知识点
+		//me.course.down('button[action=quit]').setHidden(false); //退出app
+		Ext.Viewport.setActiveItem(me.course)
 		//Ext.Viewport.setActiveItem(this)
 		//Ext.Viewport.remove(win)
 	},

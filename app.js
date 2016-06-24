@@ -17,7 +17,7 @@ Ext.application({
         'Ext.MessageBox'
     ],
 
-	dataUrl: 'http://www.xzpt.org/app/teacher/script/', //服务端,全局变量大写???
+	dataUrl: 'http://www.xzpt.org/app/teacher-dev/script/', //服务端,全局变量大写???
 	
 	/*
     views: [
@@ -29,7 +29,7 @@ Ext.application({
 		//teach includes zsd,student,topic
 	],
     stores: [
-    	'School','Zsd','Student','Topic-teach','Topic-test','Study-photos'
+    	'School','Zsd','Student','Topic-teach','Topic-test','Study-photos','Course'
     ],
 
     icon: {

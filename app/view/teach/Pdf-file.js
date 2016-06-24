@@ -13,7 +13,7 @@ Ext.define('Youngshine.view.teach.Pdf-file',{
 				text: '关闭',
 				ui: 'decline',
 				handler: function(){
-					Ext.Viewport.setActiveItem('student')
+					Ext.Viewport.setActiveItem('topic-teach')
 					this.up('pdf-file').destroy()
 				}
 			}] 

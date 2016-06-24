@@ -12,6 +12,7 @@ Ext.define('Youngshine.model.Zsd', {
 			{name: 'subjectID'}, 
 			{name: 'teacherID'}, 
 			{name: 'PDF'}, 
+			{name: 'studentstudyID'}, //报读记录：获得知识点
         ]
     }
 });

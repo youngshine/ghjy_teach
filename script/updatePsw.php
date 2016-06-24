@@ -18,7 +18,7 @@
     // 不真正删除，作废
 	$query = "UPDATE `ghjy_teacher` SET psw='$psw1' where teacherID=$teacherID ";
     $result = mysql_query($query) 
-        or die("Invalid query: deleteExam" . mysql_error());
+        or die("Invalid query: updatePassword" . mysql_error());
     
     echo json_encode(array(
         "success" => true,
