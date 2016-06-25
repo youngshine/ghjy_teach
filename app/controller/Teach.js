@@ -16,7 +16,7 @@ Ext.define('Youngshine.controller.Teach', {
 			course: {
 				//select: 'zsdSelect', //itemtap
 				itemtap: 'courseItemtap', 
-				//zsdDone: 'zsdDone'
+				itemswipe: 'courseItemswipe'
 			},
 			student: {
 				itemtap: 'studentItemtap', 
@@ -206,6 +206,48 @@ Ext.define('Youngshine.controller.Teach', {
 			}   		
 		});		
 	},
+	courseItemswipe: function( list, index, target, record, e, eOpts ){
+		console.log(e);console.log(record)
+		if(e.direction !== 'left') return false
+			
+		var me = this;
+		list.select(index,true); // 高亮当前记录
+		var actionSheet = Ext.create('Ext.ActionSheet', {
+			items: [{
+				text: '移除当前行',
+				ui: 'decline',
+				handler: function(){
+					actionSheet.hide();
+					Ext.Viewport.remove(actionSheet,true); //移除dom
+					deleteCourse(record)
+				}
+			},{
+				text: '取消',
+				scope: this,
+				handler: function(){
+					actionSheet.hide();
+					Ext.Viewport.remove(actionSheet,true); //移除dom
+					list.deselect(index); // cancel高亮当前记录
+				}
+			}]
+		});
+		Ext.Viewport.add(actionSheet);
+		actionSheet.show();	
+		
+		function deleteCourse(rec){
+			// ajax instead of jsonp
+			Ext.Ajax.request({
+			    url: me.getApplication().dataUrl + 'deleteCourse.php',
+			    params: {
+					courseID: rec.data.courseID
+			    },
+			    success: function(response){
+			        //var text = response.responseText;
+			        Ext.getStore('Course').remove(rec); 
+			    }
+			});
+		}
+	},	
 
 	// 返回选择学生，store不变
 	topicteachCourse: function(win){		

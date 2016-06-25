@@ -72880,7 +72880,7 @@ Ext.define('Youngshine.controller.Teach', {
 			course: {
 				//select: 'zsdSelect', //itemtap
 				itemtap: 'courseItemtap', 
-				//zsdDone: 'zsdDone'
+				itemswipe: 'courseItemswipe'
 			},
 			student: {
 				itemtap: 'studentItemtap', 
@@ -73070,6 +73070,48 @@ Ext.define('Youngshine.controller.Teach', {
 			}   		
 		});		
 	},
+	courseItemswipe: function( list, index, target, record, e, eOpts ){
+		console.log(e);console.log(record)
+		if(e.direction !== 'left') return false
+			
+		var me = this;
+		list.select(index,true); // 高亮当前记录
+		var actionSheet = Ext.create('Ext.ActionSheet', {
+			items: [{
+				text: '移除当前行',
+				ui: 'decline',
+				handler: function(){
+					actionSheet.hide();
+					Ext.Viewport.remove(actionSheet,true); //移除dom
+					deleteCourse(record)
+				}
+			},{
+				text: '取消',
+				scope: this,
+				handler: function(){
+					actionSheet.hide();
+					Ext.Viewport.remove(actionSheet,true); //移除dom
+					list.deselect(index); // cancel高亮当前记录
+				}
+			}]
+		});
+		Ext.Viewport.add(actionSheet);
+		actionSheet.show();	
+		
+		function deleteCourse(rec){
+			// ajax instead of jsonp
+			Ext.Ajax.request({
+			    url: me.getApplication().dataUrl + 'deleteCourse.php',
+			    params: {
+					courseID: rec.data.courseID
+			    },
+			    success: function(response){
+			        //var text = response.responseText;
+			        Ext.getStore('Course').remove(rec); 
+			    }
+			});
+		}
+	},	
 
 	// 返回选择学生，store不变
 	topicteachCourse: function(win){		
@@ -73955,6 +73997,7 @@ Ext.define('Youngshine.view.teach.Course', {
 			},{
 				text : '＋新增上课',
 				//iconCls: 'settings',
+				ui: 'action',
 				handler: function(){
 					this.up('list').onAddnew()
 				}	
@@ -74062,28 +74105,67 @@ Ext.define('Youngshine.view.teach.Course', {
 	
 	// 开始上课 ，small window-overlay
 	onAddnew: function(){
-		var me = this; 
-		
+		var me = this; 	
 		me.overlay = Ext.Viewport.add({
 			xtype: 'panel',
 			modal: true,
 			hideOnMaskTap: true,
 			centered: true,
 			width: '100%',
-			height: 220,
+			height: 280,
 			scrollable: true,
 
 	        items: [{	
 	        	xtype: 'toolbar',
 	        	docked: 'top',
 	        	title: '创建上课课时',
+				items: [{
+					text : '╳',
+					handler: function(){
+						this.up('panel').destroy()
+					}
+				},{
+					xtype: 'spacer'
+				},{
+					text : '提交',
+					ui: 'confirm',
+					disabled: true,
+					action: 'save',
+					handler: function(){
+						var studentstudyID = this.up('panel').down('selectfield[itemId=zsd]').getValue();
+						console.log(studentstudyID)
+						if (studentstudyID==null || studentstudyID==''){
+							Ext.Msg.alert('请选择知识点');
+							return;
+						}
+						// ajax
+						Ext.Ajax.request({
+						    url: Youngshine.app.getApplication().dataUrl + 'createCourse.php',
+						    params: {
+								studentstudyID: studentstudyID
+						    },
+						    success: function(response){
+						        var text = response.responseText;
+						        // process server response here
+								btnSave.setText('创建上课成功')
+								Ext.getStore('Course').load(); //reload
+								//setTimeout(me.overlay.destroy(), 3000 )
+								setTimeout(function(){ //延迟，才能滚动到最后4-1
+									me.overlay.destroy();
+								},500);
+								//Ext.toast('创建上课成功');
+						    }
+						});
+					}	
+				}]
 			},{
 				xtype: 'fieldset',
-				width: '100%',
-				//margin: '10 10 0 10',
+				width: '98%',
+				title: '选择上课的学生及其知识点',
 				items: [{
 					xtype: 'selectfield',
 					label: '学生', //选择后本地缓存，方便下次直接获取
+					labelWidth: 80,
 					itemId: 'student',
 					//id: 'mySchool',
 					displayField: 'studentName',
@@ -74096,12 +74178,15 @@ Ext.define('Youngshine.view.teach.Course', {
 					},
 					listeners: {
 						change: function(){
-							showZsd(this.getValue())
+							this.up('panel').down('selectfield[itemId=zsd]').reset();
+							this.up('panel').down('button[action=save]').setDisabled(true);
+							loadZsd(this.getValue())
 						},					
 					},
 				},{
 					xtype: 'selectfield',
 					label: '知识点', //选择后本地缓存，方便下次直接获取
+					labelWidth: 80,
 					itemId: 'zsd',
 					//id: 'mySchool',
 					displayField: 'zsdName',
@@ -74111,17 +74196,32 @@ Ext.define('Youngshine.view.teach.Course', {
 					defaultPhonePickerConfig: {
 						doneButton: '确定',
 						cancelButton: '取消'
-					}
+					},
+					listeners: {
+						change: function(field,newValue){
+							console.log(newValue)
+							if(newValue != null )
+								this.up('panel').down('button[action=save]').setDisabled(false);
+						},					
+					},
+				},{
+					xtype: 'textfield',
+					label: '时间',
+					labelWidth: 80,
+					value: new Date().toLocaleString(),
+					readOnly: true
 				}]	
+			/*	
 			},{
 				xtype: 'button',
-				text: '保存',
+				text: '提交',
 				action: 'save',
+				disabled: true,
 				margin: '-15 10 15',
 				ui: 'confirm',
 				handler: function(){
 					var btnSave = this.up('panel').down('button[action=save]');
-					if(btnSave.getText() != '保存') return false;
+					//if(btnSave.getText() != '提交') return false;
 					
 					var studentstudyID = this.up('panel').down('selectfield[itemId=zsd]').getValue();
 					console.log(studentstudyID)
@@ -74139,14 +74239,20 @@ Ext.define('Youngshine.view.teach.Course', {
 					        var text = response.responseText;
 					        // process server response here
 							btnSave.setText('创建上课成功')
+							Ext.getStore('Course').load(); //reload
+							//setTimeout(me.overlay.destroy(), 3000 )
+							setTimeout(function(){ //延迟，才能滚动到最后4-1
+								me.overlay.destroy();
+							},500);
+							//Ext.toast('创建上课成功');
 					    }
 					});
-				}
+				}  */
 			}],	
 		})
 		//me.overlay.show()
 		
-		function showZsd(studentID){
+		function loadZsd(studentID){
 			// 选择学生后，显示该学生正在报读知识点
 			var obj = {
 				"studentID": studentID,
@@ -74160,8 +74266,7 @@ Ext.define('Youngshine.view.teach.Course', {
 					if (success){
 						//Ext.Viewport.setMasked(false);
 						//Ext.Viewport.setActiveItem(me.student);
-						//me.down('selectfield[itemId=zsd]').setAutoSelect(false);
-						//me.down('selectfield[itemId=zsd]').setStore(store)
+						//me.down('selectfield[itemId=zsd]').reset();
 					}else{
 						//me.alertMsg('服务请求失败',3000)
 						Ext.Msg.alert(result.message);
