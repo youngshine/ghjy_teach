@@ -72868,7 +72868,7 @@ Ext.define('Youngshine.controller.Teach', {
 
     config: {
         refs: {
-           	zsd: 'course',
+           	course: 'course',
 			zsd: 'zsd',
 			student: 'student',
 			topicteach: 'topic-teach',
@@ -73019,8 +73019,28 @@ Ext.define('Youngshine.controller.Teach', {
 	},
 	
 	courseItemtap: function( list, index, target, record, e, eOpts )	{
-    	var me = this; 
-		console.log(record.data)
+    	var me = this; console.log(e.target.className)
+		
+		if(e.target.className=='endTime'){
+	    	Ext.Msg.confirm('',"确认本课时结束下课？",function(btn){	
+				if(btn == 'yes'){
+					Ext.Ajax.request({
+					    url: me.getApplication().dataUrl + 'updateCourse.php',
+					    params: {
+					        courseID: record.data.courseID,
+					    },
+					    success: function(response){
+					        var text = response.responseText;
+					        //record.set('fullEndtime','')
+							Ext.Viewport.setMasked({xtype:'loadmask',message:'下课了，再见'});
+							window.location.reload();
+					    }
+					});
+				}
+			});
+			return false
+		}
+		//console.log(record.data)
 		//list.down('button[action=done]').enable();
 		//list.setSelectedRecord(record);
 		//console.log(list.getSelectedRecord());
@@ -73161,7 +73181,7 @@ Ext.define('Youngshine.controller.Teach', {
 		me.topictest = Ext.create('Youngshine.view.teach.Topic-teach-test')
 		me.topictest.setOldView(oldView);	// oldView当前父view
 		me.topictest.setRecord(rec);	// record
-		//me.topictest.down('label[itemId=zsd]').setHtml(rec.data.zsdName)
+		me.topictest.down('label[itemId=zsd]').setHtml(rec.data.zsdName)
 		Ext.Viewport.add(me.topictest)
 		Ext.Viewport.setActiveItem(me.topictest)
 		
@@ -73725,7 +73745,16 @@ Ext.define('Youngshine.model.Course', {
 			{name: 'studentName'}, 
 			{name: 'studentID'},
 			{name: 'level_list'}, // 学生学科初始水平：高中低
-			{name: 'created'} // sort by
+			{name: 'created'}, // sort by
+			
+			{ name: 'fullDate', convert: function(value, record){
+					return record.get('beginTime').substr(2,8)
+				} 
+			},
+			{ name: 'fullEndtime', convert: function(value, record){
+					return record.get('endTime')>'1911-01-01'?'':'下课'
+				} 
+			},
         ]
     }
 });
@@ -73847,7 +73876,7 @@ Ext.define('Youngshine.view.Login', {
 			}] 
     	},{ */
     		xtype: 'fieldset',
-			title: '根号教育－教师PAD',
+			title: '<div style="color:#888;">根号教育一对一</div>',
 			style: {
 				maxWidth: '480px',
 				margin: '50px auto 0'
@@ -73889,7 +73918,7 @@ Ext.define('Youngshine.view.Login', {
 				color: '#fff',
 				background: '#66cc00',
 				//border: '1px solid #9d9d9d'
-				margin: '10px auto',
+				margin: '15px auto',
 				maxWidth: '474px'
 			}
 		}],
@@ -73954,9 +73983,7 @@ Ext.define('Youngshine.view.Login', {
     },
 });
 
-/**
- * Displays a list of zsd
- */
+//* Displays a list of course
 Ext.define('Youngshine.view.teach.Course', {
     extend:  Ext.dataview.List ,
 	xtype: 'course',
@@ -73966,13 +73993,14 @@ Ext.define('Youngshine.view.teach.Course', {
     config: {
         layout: 'fit',
 		store: 'Course',
+		disableSelection: true,
         //itemHeight: 89,
         emptyText: '空白',
 		//disableSelection: true,
         itemTpl: [
-            '<div style="color:#888;font-size:0.8em;">时间：{beginTime}</div>' +
-			'<div>{zsdName}</div>' +
-			'<div style="color:#888;font-size:0.8em;">学生：{studentName}</div>'
+			'<div style="color:#888;">{fullDate}｜{studentName}'+
+			'<span class="endTime" style="float:right;color:green;">{fullEndtime}</span></div>' + 
+			'<div>{zsdName}</div>'
         ],
 		
     	items: [{
@@ -74109,7 +74137,7 @@ Ext.define('Youngshine.view.teach.Course', {
 		me.overlay = Ext.Viewport.add({
 			xtype: 'panel',
 			modal: true,
-			hideOnMaskTap: true,
+			//hideOnMaskTap: true,
 			centered: true,
 			width: '100%',
 			height: 280,
@@ -74161,7 +74189,7 @@ Ext.define('Youngshine.view.teach.Course', {
 			},{
 				xtype: 'fieldset',
 				width: '98%',
-				title: '选择上课的学生及其知识点',
+				title: '<div style="color:#888;">选择上课的学生及其知识点</div>',
 				items: [{
 					xtype: 'selectfield',
 					label: '学生', //选择后本地缓存，方便下次直接获取
@@ -74209,7 +74237,7 @@ Ext.define('Youngshine.view.teach.Course', {
 					label: '时间',
 					labelWidth: 80,
 					value: new Date().toLocaleString(),
-					readOnly: true
+					disabled: true
 				}]	
 			/*	
 			},{
@@ -74275,6 +74303,7 @@ Ext.define('Youngshine.view.teach.Course', {
 			});
 		}
 		
+		Ext.getStore('Zsd').removeAll(true)
 		// 预先加载的数据
 		var obj = {
 			"teacherID": localStorage.teacherID,
@@ -76112,11 +76141,12 @@ Ext.define('Youngshine.view.teach.Topic-teach-test',{
 	//requires: ['Ext.Img','Ext.ActionSheet'], 
 	
 	config: {
-        showAnimation: {
+        /*
+		showAnimation: {
             type: "slide",
             direction: "left",
             duration: 300
-        },/*
+        },
         hideAnimation: {
             type: "slide",
             direction: "right",
@@ -76244,7 +76274,7 @@ Ext.define('Youngshine.view.teach.Topic-teach-test',{
 	// 根据学生level？？最低难度1，出考试题
 	onFetch: function(btn){
 		var me = this;
-		btn.setDisabled(true)
+		//btn.setDisabled(true)
 		
     	Ext.Msg.confirm('',"考试随机出题？",function(btn){	
 			if(btn == 'yes'){
@@ -76357,9 +76387,10 @@ Ext.define('Youngshine.view.teach.Topic-teach', {
 		itemTpl: '<div><img src="{pic_teach}" width=100% height=80 /></div>' + 
 			'<div style="text-align:center;font-size:0.8em;color:green;">{fullDone}</div></div>',
 		*/
-		itemTpl: '<div>{content}</div>' + 
-			'<div style="font-size:0.8em;color:orangered;">'+
-				'<span style="float:right;">{fullDone}</span></div>',
+		itemTpl: '<div>' + 
+			'<div>{content}</div>' +
+			'<div style="color:orangered;text-align:right;font-size:0.8em;">{fullDone}</div>'+
+			'</div>',
 		
     	items: [{
     		xtype: 'toolbar',
@@ -76495,8 +76526,8 @@ Ext.define('Youngshine.view.teach.Topic-teach', {
 		var done = 0, //做完一组题对水平，以便自适应推题
 			store = me.getStore()
 
-		if(store.getCount()>15){
-			Ext.Msg.alert('练习已超过15题');
+		if(store.getCount()>99){
+			Ext.Msg.alert('练习已超过99题');
 			return false
 		}
 		

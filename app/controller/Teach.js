@@ -4,7 +4,7 @@ Ext.define('Youngshine.controller.Teach', {
 
     config: {
         refs: {
-           	zsd: 'course',
+           	course: 'course',
 			zsd: 'zsd',
 			student: 'student',
 			topicteach: 'topic-teach',
@@ -155,8 +155,28 @@ Ext.define('Youngshine.controller.Teach', {
 	},
 	
 	courseItemtap: function( list, index, target, record, e, eOpts )	{
-    	var me = this; 
-		console.log(record.data)
+    	var me = this; console.log(e.target.className)
+		
+		if(e.target.className=='endTime'){
+	    	Ext.Msg.confirm('',"确认本课时结束下课？",function(btn){	
+				if(btn == 'yes'){
+					Ext.Ajax.request({
+					    url: me.getApplication().dataUrl + 'updateCourse.php',
+					    params: {
+					        courseID: record.data.courseID,
+					    },
+					    success: function(response){
+					        var text = response.responseText;
+					        //record.set('fullEndtime','')
+							Ext.Viewport.setMasked({xtype:'loadmask',message:'下课了，再见'});
+							window.location.reload();
+					    }
+					});
+				}
+			});
+			return false
+		}
+		//console.log(record.data)
 		//list.down('button[action=done]').enable();
 		//list.setSelectedRecord(record);
 		//console.log(list.getSelectedRecord());
@@ -297,7 +317,7 @@ Ext.define('Youngshine.controller.Teach', {
 		me.topictest = Ext.create('Youngshine.view.teach.Topic-teach-test')
 		me.topictest.setOldView(oldView);	// oldView当前父view
 		me.topictest.setRecord(rec);	// record
-		//me.topictest.down('label[itemId=zsd]').setHtml(rec.data.zsdName)
+		me.topictest.down('label[itemId=zsd]').setHtml(rec.data.zsdName)
 		Ext.Viewport.add(me.topictest)
 		Ext.Viewport.setActiveItem(me.topictest)
 		

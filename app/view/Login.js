@@ -34,7 +34,7 @@ Ext.define('Youngshine.view.Login', {
 			}] 
     	},{ */
     		xtype: 'fieldset',
-			title: '根号教育－教师PAD',
+			title: '<div style="color:#888;">根号教育一对一</div>',
 			style: {
 				maxWidth: '480px',
 				margin: '50px auto 0'
@@ -76,7 +76,7 @@ Ext.define('Youngshine.view.Login', {
 				color: '#fff',
 				background: '#66cc00',
 				//border: '1px solid #9d9d9d'
-				margin: '10px auto',
+				margin: '15px auto',
 				maxWidth: '474px'
 			}
 		}],

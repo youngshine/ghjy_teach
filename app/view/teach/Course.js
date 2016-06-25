@@ -1,6 +1,4 @@
-/**
- * Displays a list of zsd
- */
+//* Displays a list of course
 Ext.define('Youngshine.view.teach.Course', {
     extend: 'Ext.dataview.List',
 	xtype: 'course',
@@ -10,13 +8,14 @@ Ext.define('Youngshine.view.teach.Course', {
     config: {
         layout: 'fit',
 		store: 'Course',
+		disableSelection: true,
         //itemHeight: 89,
         emptyText: '空白',
 		//disableSelection: true,
         itemTpl: [
-            '<div style="color:#888;font-size:0.8em;">时间：{beginTime}</div>' +
-			'<div>{zsdName}</div>' +
-			'<div style="color:#888;font-size:0.8em;">学生：{studentName}</div>'
+			'<div style="color:#888;">{fullDate}｜{studentName}'+
+			'<span class="endTime" style="float:right;color:green;">{fullEndtime}</span></div>' + 
+			'<div>{zsdName}</div>'
         ],
 		
     	items: [{
@@ -153,7 +152,7 @@ Ext.define('Youngshine.view.teach.Course', {
 		me.overlay = Ext.Viewport.add({
 			xtype: 'panel',
 			modal: true,
-			hideOnMaskTap: true,
+			//hideOnMaskTap: true,
 			centered: true,
 			width: '100%',
 			height: 280,
@@ -205,7 +204,7 @@ Ext.define('Youngshine.view.teach.Course', {
 			},{
 				xtype: 'fieldset',
 				width: '98%',
-				title: '选择上课的学生及其知识点',
+				title: '<div style="color:#888;">选择上课的学生及其知识点</div>',
 				items: [{
 					xtype: 'selectfield',
 					label: '学生', //选择后本地缓存，方便下次直接获取
@@ -253,7 +252,7 @@ Ext.define('Youngshine.view.teach.Course', {
 					label: '时间',
 					labelWidth: 80,
 					value: new Date().toLocaleString(),
-					readOnly: true
+					disabled: true
 				}]	
 			/*	
 			},{
@@ -319,6 +318,7 @@ Ext.define('Youngshine.view.teach.Course', {
 			});
 		}
 		
+		Ext.getStore('Zsd').removeAll(true)
 		// 预先加载的数据
 		var obj = {
 			"teacherID": localStorage.teacherID,

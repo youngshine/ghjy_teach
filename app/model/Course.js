@@ -15,7 +15,16 @@ Ext.define('Youngshine.model.Course', {
 			{name: 'studentName'}, 
 			{name: 'studentID'},
 			{name: 'level_list'}, // 学生学科初始水平：高中低
-			{name: 'created'} // sort by
+			{name: 'created'}, // sort by
+			
+			{ name: 'fullDate', convert: function(value, record){
+					return record.get('beginTime').substr(2,8)
+				} 
+			},
+			{ name: 'fullEndtime', convert: function(value, record){
+					return record.get('endTime')>'1911-01-01'?'':'下课'
+				} 
+			},
         ]
     }
 });

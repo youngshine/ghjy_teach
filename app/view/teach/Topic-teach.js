@@ -17,9 +17,10 @@ Ext.define('Youngshine.view.teach.Topic-teach', {
 		itemTpl: '<div><img src="{pic_teach}" width=100% height=80 /></div>' + 
 			'<div style="text-align:center;font-size:0.8em;color:green;">{fullDone}</div></div>',
 		*/
-		itemTpl: '<div>{content}</div>' + 
-			'<div style="font-size:0.8em;color:orangered;">'+
-				'<span style="float:right;">{fullDone}</span></div>',
+		itemTpl: '<div>' + 
+			'<div>{content}</div>' +
+			'<div style="color:orangered;text-align:right;font-size:0.8em;">{fullDone}</div>'+
+			'</div>',
 		
     	items: [{
     		xtype: 'toolbar',
@@ -155,8 +156,8 @@ Ext.define('Youngshine.view.teach.Topic-teach', {
 		var done = 0, //做完一组题对水平，以便自适应推题
 			store = me.getStore()
 
-		if(store.getCount()>15){
-			Ext.Msg.alert('练习已超过15题');
+		if(store.getCount()>99){
+			Ext.Msg.alert('练习已超过99题');
 			return false
 		}
 		

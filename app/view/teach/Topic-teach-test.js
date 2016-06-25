@@ -5,11 +5,12 @@ Ext.define('Youngshine.view.teach.Topic-teach-test',{
 	//requires: ['Ext.Img','Ext.ActionSheet'], 
 	
 	config: {
-        showAnimation: {
+        /*
+		showAnimation: {
             type: "slide",
             direction: "left",
             duration: 300
-        },/*
+        },
         hideAnimation: {
             type: "slide",
             direction: "right",
@@ -137,7 +138,7 @@ Ext.define('Youngshine.view.teach.Topic-teach-test',{
 	// 根据学生level？？最低难度1，出考试题
 	onFetch: function(btn){
 		var me = this;
-		btn.setDisabled(true)
+		//btn.setDisabled(true)
 		
     	Ext.Msg.confirm('',"考试随机出题？",function(btn){	
 			if(btn == 'yes'){
