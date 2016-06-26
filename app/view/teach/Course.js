@@ -41,6 +41,7 @@ Ext.define('Youngshine.view.teach.Course', {
 				text : '＋新增上课',
 				//iconCls: 'settings',
 				ui: 'action',
+				action: 'addnew',
 				handler: function(){
 					this.up('list').onAddnew()
 				}	
@@ -174,7 +175,8 @@ Ext.define('Youngshine.view.teach.Course', {
 					ui: 'confirm',
 					disabled: true,
 					action: 'save',
-					handler: function(){
+					handler: function(btn){
+						btn.setDisabled(true); //避免重复tap
 						var studentstudyID = this.up('panel').down('selectfield[itemId=zsd]').getValue();
 						console.log(studentstudyID)
 						if (studentstudyID==null || studentstudyID==''){
@@ -190,13 +192,15 @@ Ext.define('Youngshine.view.teach.Course', {
 						    success: function(response){
 						        var text = response.responseText;
 						        // process server response here
-								btnSave.setText('创建上课成功')
+								//btnSave.setText('创建上课成功')
 								Ext.getStore('Course').load(); //reload
 								//setTimeout(me.overlay.destroy(), 3000 )
 								setTimeout(function(){ //延迟，才能滚动到最后4-1
 									me.overlay.destroy();
-								},500);
+								},100);
 								//Ext.toast('创建上课成功');
+								// 禁用新增
+								Youngshine.app.getApplication().getController('Teach').getCourse().down('button[action=addnew]').setDisabled(true)
 						    }
 						});
 					}	

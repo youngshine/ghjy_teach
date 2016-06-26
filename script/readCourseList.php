@@ -20,13 +20,13 @@ $res = new Response();
 		SELECT * FROM `ghjy_zsd-hx`";   
 	$result = mysql_query($sql); 
 	*/
-	$query = "SELECT a.*,c.zsdName,c.zsdID,d.subjectName,d.subjectID, e.studentName,e.studentID,e.level_list      
+	$query = "SELECT a.*,c.zsdName,c.zsdID,c.PDF,d.subjectName,d.subjectID, e.studentName,e.studentID,e.level_list      
 		from `ghjy_teacher_course` a 
 		JOIN `ghjy_student-study` b On a.studentstudyID=b.studentstudyID 
 		JOIN `ghjy_zsd` c On (b.zsdID=c.zsdID And b.subjectID=c.subjectID) 
 		JOIN `ghjy_subject` d On c.subjectID=d.subjectID 
 		JOIN `ghjy_student` e On b.studentID=e.studentID 
-		Where b.teacherID = '$teacherID' 
+		Where b.teacherID = '$teacherID' And b.pass=0  
 		Group By a.created Desc";
     
     $result = mysql_query($query)or die("Invalid query: readCourseList" . mysql_error());

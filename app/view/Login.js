@@ -34,7 +34,7 @@ Ext.define('Youngshine.view.Login', {
 			}] 
     	},{ */
     		xtype: 'fieldset',
-			title: '<div style="color:#888;">根号教育一对一</div>',
+			title: '<div style="color:#888;">根号教育 • 上门家教</div>',
 			style: {
 				maxWidth: '480px',
 				margin: '50px auto 0'

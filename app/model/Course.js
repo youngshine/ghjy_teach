@@ -10,6 +10,7 @@ Ext.define('Youngshine.model.Course', {
 			{name: 'endTime'}, 
 			{name: 'zsdName'}, //本课时的知识点
 			{name: 'zsdID'}, 
+			{name: 'PDF'}, 
 			{name: 'subjectName'}, 
 			{name: 'subjectID'}, 
 			{name: 'studentName'}, 

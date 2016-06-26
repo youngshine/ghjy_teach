@@ -73,8 +73,17 @@ Ext.define('Youngshine.controller.Teach', {
 					me.course.down('label[itemId=teacher]').setHtml(localStorage.teacherName)	
 					//viewport.setActiveItem()
 					Ext.Viewport.add(me.course);
+					
+					// 全部下课，才能开始上课
+					Ext.Array.each(records, function(record) {
+					    console.log(record.data)
+						if(record.data.endTime < '1901-01-01'){
+							me.course.down('button[action=addnew]').setDisabled(true)
+							return false
+						}
+					});
 				}else{
-					me.alertMsg('服务请求失败',3000)
+					me.alertMsg('服务请求失败',3000); // toast 1000
 				};
 			}   		
 		});
@@ -170,6 +179,7 @@ Ext.define('Youngshine.controller.Teach', {
 					        //record.set('fullEndtime','')
 							Ext.Viewport.setMasked({xtype:'loadmask',message:'下课了，再见'});
 							window.location.reload();
+							// 同时，微信公众号推送模版消息给学生家长
 					    }
 					});
 				}
@@ -365,7 +375,11 @@ Ext.define('Youngshine.controller.Teach', {
 				if(result.success){			
 					//返回列表
 					//view.destroy();
-					me.topicteachStudent()
+					//me.topicteachStudent()
+					Ext.Viewport.setMasked({xtype:'loadmask',message:'祝贺你考试通过！课程结束',indicator: false});
+					setTimeout(function(){ //延迟，才能滚动到最后4-1
+						window.location.reload();
+					},5000);
 				}else{
 					Ext.Msg.alert(result.message); // 错误模式窗口
 				}

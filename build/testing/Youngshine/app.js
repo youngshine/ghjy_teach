@@ -72937,8 +72937,17 @@ Ext.define('Youngshine.controller.Teach', {
 					me.course.down('label[itemId=teacher]').setHtml(localStorage.teacherName)	
 					//viewport.setActiveItem()
 					Ext.Viewport.add(me.course);
+					
+					// 全部下课，才能开始上课
+					Ext.Array.each(records, function(record) {
+					    console.log(record.data)
+						if(record.data.endTime < '1901-01-01'){
+							me.course.down('button[action=addnew]').setDisabled(true)
+							return false
+						}
+					});
 				}else{
-					me.alertMsg('服务请求失败',3000)
+					me.alertMsg('服务请求失败',3000); // toast 1000
 				};
 			}   		
 		});
@@ -73229,7 +73238,11 @@ Ext.define('Youngshine.controller.Teach', {
 				if(result.success){			
 					//返回列表
 					//view.destroy();
-					me.topicteachStudent()
+					//me.topicteachStudent()
+					Ext.Viewport.setMasked({xtype:'loadmask',message:'祝贺你考试通过！课程结束',indicator: false});
+					setTimeout(function(){ //延迟，才能滚动到最后4-1
+						window.location.reload();
+					},5000);
 				}else{
 					Ext.Msg.alert(result.message); // 错误模式窗口
 				}
@@ -73740,6 +73753,7 @@ Ext.define('Youngshine.model.Course', {
 			{name: 'endTime'}, 
 			{name: 'zsdName'}, //本课时的知识点
 			{name: 'zsdID'}, 
+			{name: 'PDF'}, 
 			{name: 'subjectName'}, 
 			{name: 'subjectID'}, 
 			{name: 'studentName'}, 
@@ -74026,6 +74040,7 @@ Ext.define('Youngshine.view.teach.Course', {
 				text : '＋新增上课',
 				//iconCls: 'settings',
 				ui: 'action',
+				action: 'addnew',
 				handler: function(){
 					this.up('list').onAddnew()
 				}	
@@ -74159,7 +74174,8 @@ Ext.define('Youngshine.view.teach.Course', {
 					ui: 'confirm',
 					disabled: true,
 					action: 'save',
-					handler: function(){
+					handler: function(btn){
+						btn.setDisabled(true); //避免重复tap
 						var studentstudyID = this.up('panel').down('selectfield[itemId=zsd]').getValue();
 						console.log(studentstudyID)
 						if (studentstudyID==null || studentstudyID==''){
@@ -74175,13 +74191,15 @@ Ext.define('Youngshine.view.teach.Course', {
 						    success: function(response){
 						        var text = response.responseText;
 						        // process server response here
-								btnSave.setText('创建上课成功')
+								//btnSave.setText('创建上课成功')
 								Ext.getStore('Course').load(); //reload
 								//setTimeout(me.overlay.destroy(), 3000 )
 								setTimeout(function(){ //延迟，才能滚动到最后4-1
 									me.overlay.destroy();
-								},500);
+								},100);
 								//Ext.toast('创建上课成功');
+								// 禁用新增
+								Youngshine.app.getApplication().getController('Teach').getCourse().down('button[action=addnew]').setDisabled(true)
 						    }
 						});
 					}	
