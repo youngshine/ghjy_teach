@@ -178,8 +178,33 @@ Ext.define('Youngshine.controller.Teach', {
 					        var text = response.responseText;
 					        //record.set('fullEndtime','')
 							Ext.Viewport.setMasked({xtype:'loadmask',message:'下课了，再见'});
-							window.location.reload();
+							//window.location.reload();
 							// 同时，微信公众号推送模版消息给学生家长
+							
+							wxTpl(record); // 发模版消息，同志学生家长
+							function wxTpl(rec){
+								console.log(rec);
+								var obj = {
+									wxID    : rec.data.wxID, // 发消息学生家长
+									courseID: rec.data.courseID,
+									zsd     : rec.data.zsdName,
+									student : rec.data.studentName,
+									teacher : localStorage.teacherName
+								}
+								console.log(obj)
+								Ext.Ajax.request({
+								    url: me.getApplication().dataUrl+'weixinJS/wx_msg_tpl.php',
+								    params: obj,
+								    success: function(response){
+								        var text = response.responseText;
+								        // process server response here
+										console.log(text)//JSON.parse
+										// 下课，发模版信息，退出
+										alert('wait')
+										window.location.reload();
+								    }
+								});
+							}
 					    }
 					});
 				}
@@ -244,7 +269,7 @@ Ext.define('Youngshine.controller.Teach', {
 		list.select(index,true); // 高亮当前记录
 		var actionSheet = Ext.create('Ext.ActionSheet', {
 			items: [{
-				text: '移除当前行',
+				text: '删除当前行',
 				ui: 'decline',
 				handler: function(){
 					actionSheet.hide();

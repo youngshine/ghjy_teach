@@ -14,7 +14,8 @@ Ext.application({
     name: 'Youngshine',
 
     requires: [
-        'Ext.MessageBox'
+        'Ext.MessageBox',
+		//'Ext.Toast'
     ],
 
 	dataUrl: 'http://www.xzpt.org/app/teacher-dev/script/', //服务端,全局变量大写???

@@ -20,7 +20,7 @@ $res = new Response();
 		SELECT * FROM `ghjy_zsd-hx`";   
 	$result = mysql_query($sql); 
 	*/
-	$query = "SELECT a.*,c.zsdName,c.zsdID,c.PDF,d.subjectName,d.subjectID, e.studentName,e.studentID,e.level_list      
+	$query = "SELECT a.*,c.zsdName,c.zsdID,c.PDF,d.subjectName,d.subjectID, e.studentName,e.studentID,e.level_list,e.wxID       
 		from `ghjy_teacher_course` a 
 		JOIN `ghjy_student-study` b On a.studentstudyID=b.studentstudyID 
 		JOIN `ghjy_zsd` c On (b.zsdID=c.zsdID And b.subjectID=c.subjectID) 
