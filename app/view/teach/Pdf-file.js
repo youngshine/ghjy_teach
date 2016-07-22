@@ -12,9 +12,8 @@ Ext.define('Youngshine.view.teach.Pdf-file',{
 			items: [{					
 				text: '关闭',
 				ui: 'decline',
-				handler: function(){
-					Ext.Viewport.setActiveItem('topic-teach')
-					this.up('pdf-file').destroy()
+				handler: function(btn){
+					btn.up('pdf-file').onBack()
 				}
 			}] 
 		},{		
@@ -22,5 +21,10 @@ Ext.define('Youngshine.view.teach.Pdf-file',{
 			//src: 'script/PDF/xiangqian.pdf',//'script/PDF/iPhoneDistributionBuildCheatsheet.pdf',
 			style: 'background-color: #222;'
 		}]
+	},
+	
+	// 返回
+	onBack: function(){
+		this.fireEvent('back',this)
 	},
 });

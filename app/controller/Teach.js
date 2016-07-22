@@ -5,27 +5,28 @@ Ext.define('Youngshine.controller.Teach', {
     config: {
         refs: {
            	course: 'course',
-			zsd: 'zsd',
-			student: 'student',
+			//zsd: 'zsd',
+			//student: 'student',
 			topicteach: 'topic-teach',
 			topicteachshow: 'topic-teach-show',
 			topicteachphotos: 'topic-teach-photos',
 			topicteachtest: 'topic-teach-test',
+			pdf: 'pdf-file'
         },
         control: {
 			course: {
 				//select: 'zsdSelect', //itemtap
 				itemtap: 'courseItemtap', 
 				itemswipe: 'courseItemswipe'
-			},
+			}, /*
 			student: {
 				itemtap: 'studentItemtap', 
 				zsd: 'studentZsd', //返回显示知识点列表
 				pdf: 'studentPDF'
-			},
+			}, */
 			topicteach: {
 				fetchTopic: 'topicteachFetch',//抓取自适应考题 
-				course: 'topicteachCourse', //返回学生列表
+				back: 'topicteachBack', 
 				photos: 'topicteachPhotos', //该学生该知识点教学过程
 				test: 'topicteachTest', //昨对10题，考试给家长看
 				pass: 'topicteachPass', //通过学习，不能再操作
@@ -33,22 +34,27 @@ Ext.define('Youngshine.controller.Teach', {
 				itemtap: 'topicteachItemtap',
 			},
 			topicteachshow: {
+				back: 'topicteachshowBack',
 				del: 'topicteachshowDelete', 
 				done: 'topicteachshowDone' // 评分
 			},
+			'pdf-file': {
+				back: 'pdfBack'
+			},
 			topicteachphotos: {
+				back: 'topicteachphotosBack',
 				del: 'topicteachphotosDelete', //删除一个图片
 			},
 			topicteachtest: {
+				back: 'topicteachtestBack',
 				fetchTopicTest: 'topicteachtestFetch', //随机出一个考题
-				//itemtap: 'topicteachtestAnswer'
 				pass: 'topicteachtestPass', //通过学习，不能再操作
 			},
         }
     },
 
 	// 登录后跳转这里 teaching zsd list of a particular teacher
-	showCourse: function(teacherID){
+	courseList: function(teacherID){
 		var me = this;
 		
 		Ext.Viewport.setMasked({xtype:'loadmask',message:'正在加载'});
@@ -66,14 +72,11 @@ Ext.define('Youngshine.controller.Teach', {
 					//me.showSearch();
 					Ext.Viewport.setMasked(false);
 					
-					// 跳转页面：选择当堂课教授知识点列表
-					//Ext.Viewport.remove(me.getLogin(),true); // dom remove myself
-					
-					me.course = Ext.create('Youngshine.view.teach.Course')
-					//me.course.down('label[itemId=teacher]').setHtml(localStorage.teacherName)	
-					me.course.down('toolbar').setTitle(localStorage.teacherName+'老师的课时列表')	
+					me.course = Ext.create('Youngshine.view.teach.Course')	
+					me.course.down('toolbar').setTitle(sessionStorage.teacherName+'老师的上课列表')	
 					Ext.Viewport.add(me.course);
 					Ext.Viewport.setActiveItem(me.course);
+					Ext.Viewport.remove(me.getLogin(),true); // dom remove myself
 					
 					// 全部下课，才能开始上课
 					Ext.Array.each(records, function(record) {
@@ -84,91 +87,18 @@ Ext.define('Youngshine.controller.Teach', {
 						}
 					});
 				}else{
-					me.alertMsg('服务请求失败',3000); // toast 1000
+					me.aler('服务请求失败',3000); // toast 1000
 				};
 			}   		
 		});
 	},	
-	//zsdSelect: function(list,record){
-	zsdItemtap: function( list, index, target, record, e, eOpts )	{
-    	var me = this; 
-		//list.down('button[action=done]').enable();
-		//list.setSelectedRecord(record);
-		//console.log(list.getSelectedRecord());
-		//me.showStudent(record);	
-		console.log(record.data)
-		//list.destroy()
-		
-		if(!me.student){
-			me.student = Ext.create('Youngshine.view.teach.Student')
-			Ext.Viewport.add(me.student)
-		}
-		
-		me.student.setRecord(record); //带入当前知识点
-		me.student.down('label[itemId=zsd]').setHtml(record.data.zsdName)
-		
-		Ext.Viewport.setMasked({xtype:'loadmask',message:'读取学生列表'});
-		// 预先加载的数据
-		var obj = {
-			"teacherID": record.data.teacherID,
-			"zsdID": record.data.zsdID, // zsdID不唯一，因三个表
-			"subjectID": record.data.subjectID
-		}
-		var store = Ext.getStore('Student'); 
-		store.getProxy().setUrl(this.getApplication().dataUrl + 
-			'readStudentList.php?data='+JSON.stringify(obj) );
-		store.load({ //异步async
-			callback: function(records, operation, success){
-				if (success){
-					Ext.Viewport.setMasked(false);
-					Ext.Viewport.setActiveItem(me.student);
-				}else{
-					//me.alertMsg('服务请求失败',3000)
-					Ext.Msg.alert(result.message);
-				};
-			}   		
-		});	
-	},
 
-	// 返回知识点列表，store不变
-	studentZsd: function(win){		
-		var me = this;
-		//var view = Ext.create('Youngshine.view.teach.Zsd');
-		//Ext.Viewport.add(view)
-		//Ext.Viewport.setActiveItem(view)
-		//Ext.Viewport.setActiveItem(this)
-		//Ext.Viewport.remove(win)
-		if(!me.zsd){
-			me.zsd = Ext.create('Youngshine.view.teach.Zsd')
-			Ext.Viewport.add(me.zsd)
-		}
-		Ext.Viewport.setActiveItem(me.zsd)
-	},
-	
-	topicteachPDF: function(rec){		
-		console.log(rec);
-		var pdffile = '';
-		if(rec.data.subjectID==1){
-			pdffile = '../PDF/sx/'
-		}else if(rec.data.subjectID==2){
-			pdffile = '../PDF/wl/'
-		}else if(rec.data.subjectID==2){
-			pdffile = '../PDF/hx/'
-		}
-		pdffile += rec.data.PDF
-		console.log(pdffile)
-		
-		var view = Ext.create('Youngshine.view.teach.Pdf-file')
-		view.down('pdfpanel').setSrc(pdffile); // pdf file in zsd table
-		Ext.Viewport.add(view)
-		Ext.Viewport.setActiveItem(view);
-	},
-	
+	// 如果点击‘下课’
 	courseItemtap: function( list, index, target, record, e, eOpts )	{
     	var me = this; console.log(e.target.className)
 		
 		if(e.target.className=='endTime'){
-	    	Ext.Msg.confirm('',"确认本课时结束下课？",function(btn){	
+	    	Ext.Msg.confirm('下课',"确认本课时结束？",function(btn){	
 				if(btn == 'yes'){
 					Ext.Ajax.request({
 					    url: me.getApplication().dataUrl + 'updateCourse.php',
@@ -188,10 +118,10 @@ Ext.define('Youngshine.controller.Teach', {
 								var obj = {
 									wxID    : rec.data.wxID, // 发消息学生家长
 									courseID: rec.data.courseID,
-									date    : rec.data.created,
+									date    : rec.data.created.substr(2,8),
 									zsd     : rec.data.zsdName,
 									student : rec.data.studentName,
-									teacher : localStorage.teacherName
+									teacher : sessionStorage.teacherName
 								}
 								console.log(obj)
 								Ext.Ajax.request({
@@ -212,26 +142,11 @@ Ext.define('Youngshine.controller.Teach', {
 			});
 			return false
 		}
-		//console.log(record.data)
-		//list.down('button[action=done]').enable();
-		//list.setSelectedRecord(record);
-		//console.log(list.getSelectedRecord());
-		//list.destroy()
-		//list.down('button[action=zsd]').disable(); //不能再返回选择知识点
-		// remove zsd view?
-		//this.getZsd().destroy()
-		
-		//me.showTopicteach(record);
-		
-		if(!me.topicteach){
-			me.topicteach = Ext.create('Youngshine.view.teach.Topic-teach')
-			Ext.Viewport.add(me.topicteach)
-		}
+
+		me.topicteach = Ext.create('Youngshine.view.teach.Topic-teach')
 		me.topicteach.setRecord(record);
 		me.topicteach.down('toolbar').setTitle(record.data.studentName)
-		
-		//Ext.Viewport.setActiveItem(this.topicteach);
-		
+
 		Ext.Viewport.setMasked({xtype:'loadmask',message:'正在加载'});
 		// 预先加载的数据
 		var obj = {
@@ -248,6 +163,7 @@ Ext.define('Youngshine.controller.Teach', {
 				if (success){
     				console.log(records);
 					Ext.Viewport.setMasked(false);
+					Ext.Viewport.add(me.topicteach); //build
 					Ext.Viewport.setActiveItem(me.topicteach);
 					
 					var btnTest = me.topicteach.down('button[action=test]'),
@@ -256,8 +172,7 @@ Ext.define('Youngshine.controller.Teach', {
 					btnTest.setHidden(records.length<10 ? true : false)
 					//btnPhoto.setHidden(records.length<1 ? true : false)
 				}else{
-					//me.alertMsg('服务请求失败',3000)
-					Ext.Msg.alert(result.message);
+					Ext.toast('出错',3000);
 				};
 			}   		
 		});		
@@ -281,6 +196,8 @@ Ext.define('Youngshine.controller.Teach', {
 				handler: function(){
 					actionSheet.hide();
 					Ext.Viewport.remove(actionSheet,true); //移除dom
+					list.deselect(index); // cancel高亮当前记录
+					list.setDisableSelection(true)
 					deleteCourse(record)
 				}
 			},{
@@ -316,27 +233,44 @@ Ext.define('Youngshine.controller.Teach', {
 		}
 	},	
 
-	// 返回选择学生，store不变
-	topicteachCourse: function(win){		
+	topicteachBack: function(oldView){		
 		var me = this;
-		if(!me.course){
-			me.course = Ext.create('Youngshine.view.teach.Course')
-			Ext.Viewport.add(me.course)
-		}
-		//me.student.down('button[action=zsd]').setHidden(true); //disable(不能再返回选择知识点
-		//me.course.down('button[action=quit]').setHidden(false); //退出app
 		Ext.Viewport.setActiveItem(me.course)
-		//Ext.Viewport.setActiveItem(this)
-		//Ext.Viewport.remove(win)
+		Ext.Viewport.remove(me.topicteach,true)
 	},
+	
+	topicteachPDF: function(rec){		
+		console.log(rec);
+		var me = this;
+		
+		var file = '';
+		if(rec.data.subjectID==1){
+			file = '../PDF/sx/'
+		}else if(rec.data.subjectID==2){
+			file = '../PDF/wl/'
+		}else if(rec.data.subjectID==2){
+			file = '../PDF/hx/'
+		}
+		file += rec.data.PDF
+		console.log(file)
+		
+		me.pdf = Ext.create('Youngshine.view.teach.Pdf-file')
+		me.pdf.down('pdfpanel').setSrc(file); // pdf file in zsd table
+		Ext.Viewport.add(me.pdf)
+		Ext.Viewport.setActiveItem(me.pdf);
+	},
+	pdfBack: function(oldView){		
+		var me = this;
+		Ext.Viewport.setActiveItem(me.topicteach)
+		Ext.Viewport.remove(me.pdf,true)
+	},
+	
 	// 返回选择学生，store不变, rec是上级course
 	topicteachPhotos: function(rec,oldView){		
 		var me = this;
 		me.studyphotos = Ext.create('Youngshine.view.teach.Topic-teach-photos')
-		me.studyphotos.setOldView(oldView);	// oldView当前父view
+		//me.studyphotos.setOldView(oldView);	// oldView当前父view
 		me.studyphotos.setRecord(rec);	// record
-		Ext.Viewport.add(me.studyphotos)
-		//Ext.Viewport.setActiveItem(view)
 		
 		Ext.Viewport.setMasked({xtype:'loadmask',message:'正在加载'});
 		var obj = {
@@ -347,13 +281,13 @@ Ext.define('Youngshine.controller.Teach', {
 			'readStudyPhotosList.php?data='+JSON.stringify(obj) );
 		store.load({ //异步async
 			callback: function(records, operation, success){
+				console.log(records);
+				Ext.Viewport.setMasked(false);
 				if (success){
-    				console.log(records);
-					Ext.Viewport.setMasked(false);
+    				Ext.Viewport.add(me.studyphotos); //build
 					Ext.Viewport.setActiveItem(me.studyphotos);
 				}else{
-					//me.alertMsg('服务请求失败',3000)
-					Ext.toast(result.message,3000);
+					Ext.toast('服务请求失败',3000);
 				};
 			}   		
 		});	
@@ -362,7 +296,6 @@ Ext.define('Youngshine.controller.Teach', {
 	topicteachTest: function(rec,oldView){		
 		var me = this; console.log(rec)
 		me.topictest = Ext.create('Youngshine.view.teach.Topic-teach-test')
-		me.topictest.setOldView(oldView);	// oldView当前父view
 		me.topictest.setRecord(rec);	// record
 		me.topictest.down('label[itemId=zsd]').setHtml(rec.data.zsdName)
 		Ext.Viewport.add(me.topictest)
@@ -410,13 +343,13 @@ Ext.define('Youngshine.controller.Teach', {
 			success: function(result){
 				Ext.Viewport.setMasked(false);
 				if(result.success){			
-					//返回列表
-					//view.destroy();
-					//me.topicteachStudent()
+					/*
 					Ext.Viewport.setMasked({xtype:'loadmask',message:'祝贺你考试通过！课程结束',indicator: false});
 					setTimeout(function(){ //延迟，才能滚动到最后4-1
 						window.location.reload();
-					},5000);
+					},5000); */
+					Ext.toast('祝贺你考试通过，课程结束。',9000)
+					window.location.reload();
 				}else{
 					Ext.toast(result.message,3000); // 错误模式窗口
 				}
@@ -459,11 +392,17 @@ Ext.define('Youngshine.controller.Teach', {
 	topicteachItemtap: function(list,index,item,record){
     	var me = this;
 		//this.topicteach.hide(); //remove(); 返回用
-		this.topicteachshow = Ext.create('Youngshine.view.teach.Topic-teach-show');
-		this.topicteachshow.setRecord(record); // 传递参数而已，题目id
-		Ext.Viewport.setActiveItem(this.topicteachshow)
+		me.topicteachshow = Ext.create('Youngshine.view.teach.Topic-teach-show');
+		me.topicteachshow.setRecord(record); // 传递参数而已，题目id
+		Ext.Viewport.add(me.topicteachshow)
+		Ext.Viewport.setActiveItem(me.topicteachshow)
 	},
-	
+
+	topicteachshowBack: function(oldView){		
+		var me = this;
+		Ext.Viewport.setActiveItem(me.topicteach)
+		Ext.Viewport.remove(me.topicteachshow,true)
+	},	
 	topicteachshowDelete: function(record,view){
 		var me = this;
 		Ext.Viewport.setMasked({xtype:'loadmask',message:'正在删除'});
@@ -480,11 +419,11 @@ Ext.define('Youngshine.controller.Teach', {
 				if(result.success){
 					// 服务端删除成功后，客户端store当前记录同时删除，列表list才能相应显示 
 					Ext.getStore('Topic-teach').remove(record); //.removeAt(i); 
-					//me.getTopicteach().show(); // hide to show
+
 					Ext.Viewport.setActiveItem(me.topicteach);
-					view.destroy(); //关闭自己					
+					Ext.Viewport.remove(me.topicteachshow,true); //关闭自己					
 				}else{
-					Ext.Msg.alert(result.message);
+					Ext.toast(result.message,3000);
 				}
 			},
 			failure: function(){
@@ -520,7 +459,12 @@ Ext.define('Youngshine.controller.Teach', {
 			}
 		});
 	},	
-	
+
+	topicteachphotosBack: function(){
+		var me = this
+		Ext.Viewport.setActiveItem(me.topicteach)
+		Ext.Viewport.remove(me.topicteachphotos,true)
+	},	
 	// 删除教学图片
 	topicteachphotosDelete: function(rec){
 		var me = this;
@@ -536,7 +480,7 @@ Ext.define('Youngshine.controller.Teach', {
 				if(result.success){
 					Ext.getStore('Study-photos').remove(rec); 				
 				}else{
-					Ext.Msg.alert(result.message);
+					Ext.toast(result.message,3000);
 				}
 			},
 			failure: function(){
@@ -546,6 +490,11 @@ Ext.define('Youngshine.controller.Teach', {
 		});	
 	},
 	
+	topicteachtestBack: function(){
+		var me = this
+		Ext.Viewport.setActiveItem(me.topicteach)
+		Ext.Viewport.remove(me.topicteachtest,true)
+	},
 	// 随机出一个考题，临时表
 	topicteachtestFetch: function(obj,win){
 		var me = this;
@@ -580,13 +529,7 @@ Ext.define('Youngshine.controller.Teach', {
 				}
 			},
 		});
-
 	},	
-	topicteachtestAnswer: function(list,index,item,record){
-    	// 客观选择题目的答案
-		Ext.Msg.alert(record.data.objective_answer);
-	},
-
 			
 	/* 如果用户登录的话，控制器launch加载相关的store */
 	launch: function(){

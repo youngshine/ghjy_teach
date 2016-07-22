@@ -31,10 +31,8 @@ Ext.define('Youngshine.view.teach.Topic-teach', {
 				action: 'back',
 				text : '课时列表',
 				//iconCls: 'team',
-				handler: function(){
-					//var view = Youngshine.app.getController('Teach').getStudent();
-					//Ext.Viewport.add(view);	
-					this.up('list').onCourse() //返回
+				handler: function(btn){
+					btn.up('list').onBack() //返回
 				}
 			},{
 				xtype: 'spacer'
@@ -44,8 +42,8 @@ Ext.define('Youngshine.view.teach.Topic-teach', {
 				text : '考试',
 				hidden: true, //开始不可见，有添加题目才显示？
 				//iconCls: 'add',
-				handler: function(){
-					this.up('list').onTest()
+				handler: function(btn){
+					btn.up('list').onTest()
 				}		
 			}]
 		},{
@@ -179,7 +177,7 @@ Ext.define('Youngshine.view.teach.Topic-teach', {
 		if(done > 0) 
 			level = Math.floor( done/(store.getCount()) ); //得出做题平均分parseInt
 
-    	Ext.Msg.confirm('',"添加5个自适应练习题？",function(btn){	
+    	Ext.Msg.confirm('添加练习题',"随机添加5个自适应题目？",function(btn){	
 			if(btn == 'yes'){
 				var obj = {
 					"level": level,//该学科难度
@@ -196,13 +194,12 @@ Ext.define('Youngshine.view.teach.Topic-teach', {
 
 	},
 	// 返回
-	onCourse: function(){
-		this.fireEvent('course')
+	onBack: function(){
+		this.fireEvent('back',this)
 	},
 	
 	onPDF: function(){
-		var me = this;
-		me.fireEvent('pdf',me.getRecord())
+		this.fireEvent('pdf',this.getRecord(),this)
 	},
 	
 	// 拍照教学过程
@@ -227,8 +224,7 @@ Ext.define('Youngshine.view.teach.Topic-teach', {
 			if(store.getAt(i).get('done')==3) count += 1	
 		}
 		if(count<9){
-			Ext.Msg.alert('未做对10题');
-			return false
+			Ext.toast('未做对10题',3000);return
 		} 
 		this.fireEvent('test', this.getRecord(), this)
 	},	
@@ -283,10 +279,7 @@ Ext.define('Youngshine.view.teach.Topic-teach', {
 		//if(e.target.className != "prodinfo") // 滑动商品名称等panel才退回
 		//	return
 		if(e.direction=='right'){
-        	//Ext.Viewport.setActiveItem( Youngshine.app.getController('Teach').getStudent() );
-			//Youngshine.app.getController('Teach').topicteachStudent(); // 相当于返回
-			//this.destroy();
-			me.onStudent();
+			me.onBack();
         };     
     }, 
 });

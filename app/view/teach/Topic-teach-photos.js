@@ -1,16 +1,11 @@
 Ext.define('Youngshine.view.teach.Topic-teach-photos', {
-    extend: 'Ext.Container',
+    extend: 'Ext.Panel',
 	xtype: 'topic-teach-photos',
 	
     config: {
-        showAnimation: {
-            type: "pop",
-            //direction: "left",
-            duration: 100
-        },
-		
+
 		layout: 'vbox',
-		oldView: '', //父view
+		//oldView: '', //父view
 		record: null,
 		
         items: [{
@@ -22,13 +17,7 @@ Ext.define('Youngshine.view.teach.Topic-teach-photos', {
 				action: 'back',
 				text : '返回',
 				handler: function(btn){
-					//var view = Youngshine.app.getController('Teach').getStudent();
-					//Ext.Viewport.add(view);	
-					
-					var oldView = btn.up('topic-teach-photos').getOldView(); //.xtype
-					console.log(oldView)
-					Ext.Viewport.setActiveItem(oldView)
-					btn.up('topic-teach-photos').destroy() //返回
+					btn.up('panel').onBack()
 				},
 				scope: this
 /*			},{
@@ -118,7 +107,12 @@ Ext.define('Youngshine.view.teach.Topic-teach-photos', {
 			fn: 'onRemoveItem'
 		}]
     },
-	
+
+	// 返回
+	onBack: function(){
+		this.fireEvent('back',this)
+	},
+		
 	initialize: function(){
 		this.callParent(arguments);
 		

@@ -5,7 +5,7 @@ Ext.define('Youngshine.view.teach.Topic-teach-show',{
 	//requires: ['Ext.Img','Ext.ActionSheet'], 
 	
 	config: {
-        showAnimation: {
+/*        showAnimation: {
             type: "slide",
             direction: "left",
             duration: 300
@@ -14,7 +14,7 @@ Ext.define('Youngshine.view.teach.Topic-teach-show',{
             type: "slide",
             direction: "right",
             duration: 300
-        },
+        }, */
 		//layout: 'vbox',
 		scrollable: true,
 		
@@ -187,16 +187,16 @@ Ext.define('Youngshine.view.teach.Topic-teach-show',{
 
 	onBack: function(){
 		var me = this;
+		/*
 		var view = Youngshine.app.getController('Teach').getTopicteach();
-		//Ext.Viewport.setActiveItem(view);	
-		//this.destroy()
-		
-		view.setShowAnimation(false); // 关闭实例的show动画，避免和当前页面hide交叉
+		view.setShowAnimation(false); 
+		// 关闭实例的show动画，避免和当前页面hide交叉
 		Ext.Viewport.setActiveItem(view);	
 		me.hide();
 		setTimeout(function(){ //延迟，才能hide config动画，滚动到最后4-1
 			me.destroy();
-		},300);	
+		},300);	*/
+		me.fireEvent('back', me);
 	},
 	
     //use initialize method to swipe back 右滑返回

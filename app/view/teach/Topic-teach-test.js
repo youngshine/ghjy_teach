@@ -19,7 +19,7 @@ Ext.define('Youngshine.view.teach.Topic-teach-test',{
 		//layout: 'vbox',
 		scrollable: true,
 		
-		oldView: '', //父view
+		//oldView: '', //父view
 		record: null,
 		
 		items: [{
@@ -32,12 +32,6 @@ Ext.define('Youngshine.view.teach.Topic-teach-test',{
         		//iconMask: true,
 				ui: 'back',
 				action: 'back',	
-				handler: function(){
-					//var oldView = btn.up('list').getOldView(); //.xtype
-					//console.log(oldView)
-					//Ext.Viewport.setActiveItem(oldView)
-					//btn.up('list').destroy() //返回
-				}
             },{
             	xtype: 'spacer'	
         	},{
@@ -140,7 +134,7 @@ Ext.define('Youngshine.view.teach.Topic-teach-test',{
 		var me = this;
 		//btn.setDisabled(true)
 		
-    	Ext.Msg.confirm('',"考试随机出题？",function(btn){	
+    	Ext.Msg.confirm('出题',"随机抽取考题？",function(btn){	
 			if(btn == 'yes'){
 				var obj = {
 					"level": 1, //level,//考试题目用最忌难度 1 (2,3)
@@ -198,16 +192,7 @@ Ext.define('Youngshine.view.teach.Topic-teach-test',{
 
 	onBack: function(){
 		var me = this;
-		var view = Youngshine.app.getController('Teach').getTopicteach();
-		//Ext.Viewport.setActiveItem(view);	
-		//this.destroy()
-		
-		view.setShowAnimation(false); // 关闭实例的show动画，避免和当前页面hide交叉
-		Ext.Viewport.setActiveItem(view);	
-		me.hide();
-		setTimeout(function(){ //延迟，才能hide config动画，滚动到最后4-1
-			me.destroy();
-		},300);	
+		me.fireEvent('back',me);
 	},
 	
     //use initialize method to swipe back 右滑返回
@@ -224,8 +209,6 @@ Ext.define('Youngshine.view.teach.Topic-teach-test',{
 		//if(e.target.className != "prodinfo") // 滑动商品名称等panel才退回
 		//	return
 		if(e.direction=='right'){
-        	//Ext.Viewport.setActiveItem( Youngshine.app.getController('Teach').getTopicteach() );
-			//this.destroy();
 			me.onBack();
         };     
     }, 

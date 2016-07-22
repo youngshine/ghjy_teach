@@ -40805,6 +40805,271 @@ Ext.define('Ext.TitleBar', {
 });
 
 /**
+ * A 'Toast' is a simple modal message that is displayed on the screen and then automatically closed by a timeout or by a user tapping
+ * outside of the toast itself. Think about it like a text only alert box that will self destruct. **A Toast should not be instantiated manually**
+ * but creating by calling 'Ext.toast(message, timeout)'. This will create one reusable toast container and content will be swapped out as
+ * toast messages are queued or displayed.
+ *
+ *  # Simple Toast
+ *
+ *      @example miniphone
+ *      Ext.toast('Hello Sencha!'); // Toast will close in 1000 milliseconds (default)
+ *
+ *  # Toast with Timeout
+ *
+ *      @example miniphone
+ *      Ext.toast('Hello Sencha!', 5000); // Toast will close in 5000 milliseconds
+ *
+ *  # Toast with config
+ *
+ *      @example miniphone
+ *      Ext.toast({message: 'Hello Sencha!', timeout: 2000}); // Toast will close in 2000 milliseconds
+ *
+ * # Multiple Toasts queued
+ *
+ *      @example miniphone
+ *      Ext.toast('Hello Sencha!');
+ *      Ext.toast('Hello Sencha Again!');
+ *      Ext.toast('Hello Sencha One More Time!');
+ */
+Ext.define('Ext.Toast', {
+    extend:  Ext.Sheet ,
+               
+                               
+      
+
+    config: {
+        /**
+         * @cfg
+         * @inheritdoc
+         */
+        ui: 'dark',
+
+        /**
+         * @cfg
+         * @inheritdoc
+         */
+        baseCls: Ext.baseCSSPrefix + 'toast',
+
+        /**
+         * @cfg
+         * @inheritdoc
+         */
+        showAnimation: {
+            type: 'popIn',
+            duration: 250,
+            easing: 'ease-out'
+        },
+
+        /**
+         * @cfg
+         * @inheritdoc
+         */
+        hideAnimation: {
+            type: 'popOut',
+            duration: 250,
+            easing: 'ease-out'
+        },
+
+        /**
+         * Override the default `zIndex` so it is normally always above floating components.
+         */
+        zIndex: 999,
+
+        /**
+         * @cfg {String} message
+         * The message to be displayed in the {@link Ext.Toast}.
+         * @accessor
+         */
+        message: null,
+
+        /**
+         * @cfg {Number} timeout
+         * The amount of time in milliseconds to wait before destroying the toast automatically
+         */
+        timeout: 1000,
+
+        /**
+         * @cfg{Boolean/Object} animation
+         * The animation that should be used between toast messages when they are queued up
+         */
+        messageAnimation: true,
+
+        /**
+         * @cfg
+         * @inheritdoc
+         */
+        hideOnMaskTap: true,
+
+        /**
+         * @private
+         */
+        modal: true,
+
+        /**
+         * @cfg
+         * @inheritdoc
+         */
+        layout: {
+            type: 'vbox',
+            pack: 'center'
+        }
+    },
+
+    /**
+     * @private
+     */
+    applyMessage: function(config) {
+        config = {
+            html: config,
+            cls: this.getBaseCls() + '-text'
+        };
+
+        return Ext.factory(config, Ext.Component, this._message);
+    },
+
+    /**
+     * @private
+     */
+    updateMessage: function(newMessage) {
+        if (newMessage) {
+            this.add(newMessage);
+        }
+    },
+
+    /**
+     * @private
+     */
+    applyTimeout: function(timeout) {
+        if (this._timeoutID) {
+            clearTimeout(this._timeoutID);
+            if (!Ext.isEmpty(timeout)) {
+                this._timeoutID = setTimeout(Ext.bind(this.onTimeout, this), timeout);
+            }
+        }
+        return timeout;
+    },
+
+    /**
+     * @internal
+     */
+    next: Ext.emptyFn,
+
+    /**
+     * @private
+     */
+    show: function(config) {
+        var me = this,
+            timeout = config.timeout,
+            msgAnimation = me.getMessageAnimation(),
+            message = me.getMessage();
+
+        if (me.isRendered() && me.isHidden() === false) {
+            config.timeout = null;
+            message.onAfter({
+                hiddenchange: function() {
+                    me.setMessage(config.message);
+                    message = me.getMessage();
+                    message.onAfter({
+                        hiddenchange: function() {
+
+                            // Forces applyTimeout to create a timer
+                            this._timeoutID = true;
+                            me.setTimeout(timeout);
+                        },
+                        scope: me,
+                        single: true
+                    });
+                    message.show(msgAnimation);
+                },
+                scope: me,
+                single: true
+            });
+
+            message.hide(msgAnimation);
+        } else {
+            Ext.util.InputBlocker.blockInputs();
+            me.setConfig(config);
+
+            //if it has not been added to a container, add it to the Viewport.
+            if (!me.getParent() && Ext.Viewport) {
+                Ext.Viewport.add(me);
+            }
+
+            if (!Ext.isEmpty(timeout)) {
+                me._timeoutID = setTimeout(Ext.bind(me.onTimeout, me), timeout);
+            }
+
+            me.callParent(arguments);
+        }
+    },
+
+    /**
+     * @private
+     */
+    hide: function(animation) {
+        clearTimeout(this._timeoutID);
+        if (!this.next()) {
+            this.callParent(arguments);
+        }
+    },
+
+    /**
+     * @private
+     */
+    onTimeout: function() {
+        this.hide();
+    }
+}, function(Toast) {
+    var _queue = [], _isToasting = false;
+
+    function next() {
+        var config = _queue.shift();
+
+        if (config) {
+            _isToasting = true;
+            this.show(config);
+        } else {
+            _isToasting = false;
+        }
+
+        return _isToasting;
+    }
+
+    function getInstance() {
+        if (!Ext.Toast._instance) {
+            Ext.Toast._instance = Ext.create('Ext.Toast');
+            Ext.Toast._instance.next = next;
+        }
+        return Ext.Toast._instance;
+    }
+
+    Ext.toast = function(message, timeout) {
+        var toast = getInstance(),
+            config = message;
+
+        if (Ext.isString(message)) {
+            config = {
+                message: message,
+                timeout: timeout
+            };
+        }
+
+        if (config.timeout === undefined) {
+            config.timeout = Ext.Toast.prototype.config.timeout;
+        }
+
+        _queue.push(config);
+        if (!_isToasting) {
+            toast.next();
+        }
+
+        return toast;
+    }
+});
+
+
+/**
  * @author Ed Spencer
  * @private
  *
@@ -72756,45 +73021,41 @@ Ext.define('Youngshine.controller.Main', {
 	2)抓取未读信息列表（定期）
 	3)获得当前地理位置，发给服务端 （定期）
 	*/
-    loginOk: function(username,psw,school){  	
+    loginOk: function(obj,oldView){  	
     	var me = this;
 		Ext.Viewport.setMasked({xtype:'loadmask',message:'正在登录'});
-		
-    	Ext.data.JsonP.request({			
+	console.log(obj)	
+    	Ext.Ajax.request({			
 			url: me.getApplication().dataUrl + 'login.php',
-			callbackKey: 'callback',
-			timeout: 10000,
-			params:{
-				data: '{"username":"' + username + '","psw":"' + psw + '","school":"' + school + '"}'
-			},
-			success: function(result){ // 服务器连接成功
-				/* 登录成功后 
-				   1)CarpoolGlobal.MemberInfo.Member_ID改变值 2)未读消息 3）位置信息 */
-				//myMsgbox.hide(); //关闭提示窗口  
+			//callbackKey: 'callback',
+			//timeout: 14000,
+			params: obj,
+			success: function(response){ // 服务器连接成功
 				Ext.Viewport.setMasked(false); 
-				if (result.success){ // 返回值有success成功
-					console.log(result.data)
-					//localStorage.setItem('isLogin',true); // 登录状态
-					localStorage.setItem('teacherID',result.data.teacherID);
-					localStorage.setItem('teacherName',result.data.teacherName);
-					localStorage.setItem('school',result.data.schoolName); // not schoolID
+				var ret = JSON.parse(response.responseText)
+				console.log(ret)
+				if (ret.success){ // 返回值有success成功
+					console.log(ret.data)
+					sessionStorage.setItem('teacherID',ret.data.teacherID);
+					sessionStorage.setItem('teacherName',ret.data.teacherName);
+					sessionStorage.setItem('school',ret.data.schoolName); // not schoolID
 					 // 会员id保存在localstorage，app.js, logout退出到登录界面用？4.4
 
 					// 登录成功，发送地理位置，给服务器 600秒一次？
 					
 					// 跳转页面：选择当堂课教授知识点列表
 					//me.showZsd(result.data.teacherID);
-					me.getApplication().getController('Teach').showCourse(result.data.teacherID);
+					me.getApplication().getController('Teach').showCourse(ret.data.teacherID);
 					Ext.Viewport.remove(me.getLogin(),true); // dom remove myself
-					//Ext.Viewport.setActiveItem(Ext.create('Youngshine.view.teach.Zsd'));  					
+					//Ext.Viewport.setActiveItem(Ext.create('Youngshine.view.teach.Zsd'))			
 				}else{
-					Ext.Msg.alert(result.message);
+					Ext.toast(ret.message,3000);
 				}
 			},
 			failure: function(){
 				//myMsgbox.hide();
 				Ext.Viewport.setMasked(false);
-				Ext.Msg.alert('服务请求失败');
+				Ext.toast('服务请求失败',3000);
 			}
 		});
 	},
@@ -72809,18 +73070,6 @@ Ext.define('Youngshine.controller.Main', {
 				window.location.reload();
 			}
 		});
-	},
-	
-	// 公用提示，2秒自动消失
-	alertMsg: function(msg,timeLength){
-		Ext.Viewport.setMasked({
-			xtype: 'loadmask',
-			message: '<div style="padding:10px 15px;color:#fff;background:#777;">' + msg + '</div>',
-			indicator: false,
-		});
-		setTimeout(function(){ //延迟，才能滚动到最后4-1
-			Ext.Viewport.setMasked(false);
-		},timeLength);
 	},
 	
 	// controller launch Called by the Controller's application immediately after the Application's own launch function has been called. This is usually a good place to run any logic that has to run after the app UI is initialized. 
@@ -72926,9 +73175,10 @@ Ext.define('Youngshine.controller.Teach', {
 					//Ext.Viewport.remove(me.getLogin(),true); // dom remove myself
 					
 					me.course = Ext.create('Youngshine.view.teach.Course')
-					me.course.down('label[itemId=teacher]').setHtml(localStorage.teacherName)	
-					//viewport.setActiveItem()
+					//me.course.down('label[itemId=teacher]').setHtml(localStorage.teacherName)	
+					me.course.down('toolbar').setTitle(localStorage.teacherName+'老师的课时列表')	
 					Ext.Viewport.add(me.course);
+					Ext.Viewport.setActiveItem(me.course);
 					
 					// 全部下课，才能开始上课
 					Ext.Array.each(records, function(record) {
@@ -73127,6 +73377,7 @@ Ext.define('Youngshine.controller.Teach', {
 		if(record.data.endTime >'1901-01-01') return false
 			
 		var me = this;
+		list.setDisableSelection(false)
 		list.select(index,true); // 高亮当前记录
 		var actionSheet = Ext.create('Ext.ActionSheet', {
 			items: [{
@@ -73135,6 +73386,8 @@ Ext.define('Youngshine.controller.Teach', {
 				handler: function(){
 					actionSheet.hide();
 					Ext.Viewport.remove(actionSheet,true); //移除dom
+					list.deselect(index); // cancel高亮当前记录
+					list.setDisableSelection(true)
 					deleteCourse(record)
 				}
 			},{
@@ -73144,6 +73397,7 @@ Ext.define('Youngshine.controller.Teach', {
 					actionSheet.hide();
 					Ext.Viewport.remove(actionSheet,true); //移除dom
 					list.deselect(index); // cancel高亮当前记录
+					list.setDisableSelection(true)
 				}
 			}]
 		});
@@ -73158,8 +73412,12 @@ Ext.define('Youngshine.controller.Teach', {
 					courseID: rec.data.courseID
 			    },
 			    success: function(response){
-			        //var text = response.responseText;
-			        Ext.getStore('Course').remove(rec); 
+			        var ret = response.responseText;
+					ret = JSON.parse(ret)
+					if(ret.success){
+						Ext.getStore('Course').remove(rec); 
+					}
+			        Ext.toast(ret.message)	
 			    }
 			});
 		}
@@ -73178,7 +73436,7 @@ Ext.define('Youngshine.controller.Teach', {
 		//Ext.Viewport.setActiveItem(this)
 		//Ext.Viewport.remove(win)
 	},
-	// 返回选择学生，store不变
+	// 返回选择学生，store不变, rec是上级course
 	topicteachPhotos: function(rec,oldView){		
 		var me = this;
 		me.studyphotos = Ext.create('Youngshine.view.teach.Topic-teach-photos')
@@ -73202,7 +73460,7 @@ Ext.define('Youngshine.controller.Teach', {
 					Ext.Viewport.setActiveItem(me.studyphotos);
 				}else{
 					//me.alertMsg('服务请求失败',3000)
-					Ext.Msg.alert(result.message);
+					Ext.toast(result.message,3000);
 				};
 			}   		
 		});	
@@ -73267,7 +73525,7 @@ Ext.define('Youngshine.controller.Teach', {
 						window.location.reload();
 					},5000);
 				}else{
-					Ext.Msg.alert(result.message); // 错误模式窗口
+					Ext.toast(result.message,3000); // 错误模式窗口
 				}
 			}
 		});
@@ -73299,7 +73557,7 @@ Ext.define('Youngshine.controller.Teach', {
 					//store.add(result.data).. store.insert()
 					//console.log(store.data)		
 				}else{
-					Ext.Msg.alert(result.message);
+					Ext.toast(result.message,3000);
 				}
 			},
 		});
@@ -73338,7 +73596,7 @@ Ext.define('Youngshine.controller.Teach', {
 			},
 			failure: function(){
 				Ext.Viewport.setMasked(false);
-				Ext.Msg.alert('服务请求失败');
+				Ext.toast('服务请求失败',3000);
 			}
 		});	
 	},
@@ -73364,7 +73622,7 @@ Ext.define('Youngshine.controller.Teach', {
 					record.set('done',done)
 					record.set('fullDone',fullDone)
 				}else{
-					Ext.Msg.alert(result.message); // 错误模式窗口
+					Ext.toast(result.message,3000); // 错误模式窗口
 				}
 			}
 		});
@@ -73390,7 +73648,7 @@ Ext.define('Youngshine.controller.Teach', {
 			},
 			failure: function(){
 				Ext.Viewport.setMasked(false);
-				Ext.Msg.alert('服务请求失败');
+				Ext.toast('服务请求失败');
 			}
 		});	
 	},
@@ -73425,7 +73683,7 @@ Ext.define('Youngshine.controller.Teach', {
 					console.log(btnPass)
 					btnPass.setHidden(false) */
 				}else{
-					Ext.Msg.alert(result.message);
+					Ext.toast(result.message,3000);
 				}
 			},
 		});
@@ -73494,6 +73752,8 @@ Ext.define('Youngshine.model.Zsd', {
 			{name: 'teacherID'}, 
 			{name: 'PDF'}, 
 			{name: 'studentstudyID'}, //报读记录：获得知识点
+			{name: 'times'}, //课时
+			{name: 'prepaidID'} //对应购买订单的总课时
         ]
     }
 });
@@ -73784,6 +74044,9 @@ Ext.define('Youngshine.model.Course', {
 			{name: 'level_list'}, // 学生学科初始水平：高中低
 			{name: 'wxID'}, //学生家长微信，公众号发模版消息
 			
+			{name: 'prepaidID'}, //该堂课的知识点归属哪个订单，用于统计课时是否超标购买课时
+			{name: 'times'}, //该堂课的知识点归属哪个订单，用于获得购买课时
+			
 			{name: 'created'}, // sort by
 			
 			{ name: 'fullDate', convert: function(value, record){
@@ -73835,18 +74098,17 @@ Ext.application({
 
                
                          
-		             
+		           
       
 
-	dataUrl: 'http://www.xzpt.org/app/teacher-dev/script/', //服务端,全局变量大写???
-	
+	dataUrl: 'http://www.xzpt.org/app/teach1to1/script/', 
 	/*
     views: [
         'Login'
     ], */
 	controllers: [
 		'Main','Teach' 
-		// Main控制器包含处理登录
+		// Main√ä√©√ü√Ç√†‚àÇ√Ç√¥¬Æ√Ç√•√ñ√Ç√™¬¥√Ç¬ß√ë√Å√™√ú√Å√¥¬™√ÇŒ©√Ø
 		//teach includes zsd,student,topic
 	],
     stores: [
@@ -73876,12 +74138,14 @@ Ext.application({
         Ext.fly('appLoadingIndicator').destroy();
 
         // Initialize the main view
-        Ext.Viewport.add(Ext.create('Youngshine.view.Login'));
+		var login = Ext.create('Youngshine.view.Login')
+        Ext.Viewport.add(login); // build?
+		Ext.Viewport.setActiveItem(login);
     },
 });
 
 Ext.define('Youngshine.view.Login', {
-    extend:  Ext.form.FormPanel ,
+    extend:  Ext.form.Panel ,
     xtype: 'login',
 	
     config: {
@@ -73926,12 +74190,13 @@ Ext.define('Youngshine.view.Login', {
     			xtype: 'textfield',
 				itemId: 'username',
     			label: '账号',
-				placeHolder: ''
+				placeHolder: '',
+				clearIcon: false
     		},{
     			xtype : 'passwordfield',
-				itemId : 'psw',
+				//itemId : 'psw',
 				label : '密码',
-				//placeHolder: '默认123456'
+				clearIcon: false
 /*			},{
 				xtype: 'selectfield',
 				label: '校区', //选择后本地缓存，方便下次直接获取
@@ -73949,7 +74214,8 @@ Ext.define('Youngshine.view.Login', {
 				xtype: 'textfield',
 				itemId: 'school',
     			label: '校区',
-				placeHolder: '输入加盟校区'
+				placeHolder: '输入加盟校区',
+				clearIcon: false
     		}]
     	},{
 			//html: '<br /><div class="forgetpassword" style="float:right;color:#fff;">忘记密码？</div>'
@@ -73958,6 +74224,7 @@ Ext.define('Youngshine.view.Login', {
 			text : '登录',
 			ui : 'plain',
 			action: 'login',
+			disabled: true,
 			style: {
 				color: '#fff',
 				background: '#66cc00',
@@ -73971,6 +74238,14 @@ Ext.define('Youngshine.view.Login', {
     		delegate: 'button[action=login]',
     		event: 'tap',
     		fn: 'onLogin'
+		},{
+    		delegate: 'textfield',
+    		event: 'keyup',
+    		fn: 'onSetBtn'	
+		},{
+    		delegate: 'passwordfield',
+    		event: 'change',
+    		fn: 'onSetBtn'
     	},{
 			/*测试用 填入用户和密码
     		delegate: 'button[action=demo]',
@@ -73990,27 +74265,26 @@ Ext.define('Youngshine.view.Login', {
 	// 控制器Main
     onLogin: function(){
     	// 带入参数：当前表单的用户名和密码
-    	var username = this.down('textfield[itemId=username]').getValue(),
-			psw = this.down('textfield[itemId=psw]').getValue(),
-			//schoolID = this.down('selectfield[itemId=school]').getValue();
-			school = this.down('textfield[itemId=school]').getValue();
-		console.log(school+username+psw)
-		//if (schoolID==null || schoolID==''){
-		if (school==null || school==''){
-			Ext.Msg.alert('加盟校区不能空白');
-			return;
-		}
-		if (username==''){
-			Ext.Msg.alert('请输入账号');
-			return;
-		}
-		if (psw.length<6){
-			Ext.Msg.alert('密码至少6位');
-			return;
-		}	
-	
-    	this.fireEvent('loginOk', username,psw,school);		
+    	var obj = {
+    		"username": this.down('textfield[itemId=username]').getValue().trim(),
+			"psw"     : this.down('passwordfield').getValue().trim(),
+			"school"  : this.down('textfield[itemId=school]').getValue().trim()
+    	}
+    	this.fireEvent('loginOk', obj,this);		
     },	
+
+	onSetBtn: function(){
+		var username = this.down('textfield[itemId=username]').getValue().trim(),
+			psw = this.down('passwordfield').getValue().trim(),
+			school = this.down('textfield[itemId=school]').getValue().trim();
+	
+		var btnLogin = this.down('button[action=login]')	
+		if(username != '' && psw != '' && school != ''){
+			btnLogin.setDisabled(false);
+		}else{
+			btnLogin.setDisabled(true);
+		}				
+	},
 	
 	// 初始化
     initialize: function() {
@@ -74021,8 +74295,9 @@ Ext.define('Youngshine.view.Login', {
         });
     },
     onPainted: function() {
-		this.down('textfield[itemId=username]').setValue(localStorage.teacherName)
-		this.down('textfield[itemId=school]').setValue(localStorage.school)
+		console.log(sessionStorage.school)
+		this.down('textfield[itemId=username]').setValue(sessionStorage.teacherName)
+		this.down('textfield[itemId=school]').setValue(sessionStorage.school)
 		//Ext.getCmp('mySchool').setValue(localStorage.school)
     },
 });
@@ -74035,14 +74310,15 @@ Ext.define('Youngshine.view.teach.Course', {
     id: 'courseList',
 
     config: {
-        layout: 'fit',
+        ui: 'round',
+		//layout: 'fit',
 		store: 'Course',
 		disableSelection: true,
         //itemHeight: 89,
         emptyText: '空白',
-		//disableSelection: true,
+		striped: true,
         itemTpl: [
-			'<div style="color:#888;">{fullDate}｜{studentName}'+
+			'<div style="color:#888;">{fullDate}｜学生：{studentName}'+
 			'<span class="endTime" style="float:right;color:green;">{fullEndtime}</span></div>' + 
 			'<div>{zsdName}</div>'
         ],
@@ -74059,8 +74335,8 @@ Ext.define('Youngshine.view.teach.Course', {
 					Youngshine.app.getController('Main').logout()
 				}
 			},{
-				text : '设置',
-				//iconCls: 'settings',
+				//text : '设置',
+				iconCls: 'settings',
 				handler: function(){
 					this.up('list').onSetup()
 				}
@@ -74071,19 +74347,17 @@ Ext.define('Youngshine.view.teach.Course', {
 				//iconCls: 'settings',
 				ui: 'action',
 				action: 'addnew',
-				handler: function(){
-					this.up('list').onAddnew()
+				handler: function(btn){
+					btn.up('list').onAddnew(btn)
 				}	
 			}]
-		},{
+/*		},{
 			xtype: 'label',
 			docked: 'top',
 			html: '',
 			itemId: 'teacher',
-			style: 'text-align:center;color:#888;font-size:0.9em;margin:5px;'
+			style: 'text-align:center;color:#888;font-size:0.9em;margin:5px;' */
     	}],
-		
-		//selectedRecord: null,
     },
 	
 	// 设置密码 ，small window-overlay
@@ -74100,13 +74374,46 @@ Ext.define('Youngshine.view.teach.Course', {
 				
 			},
 			centered: true,
-			width: 330,height: 220,
+			width: 330,height: 200,
 			scrollable: true,
 
 	        items: [{	
 	        	xtype: 'toolbar',
 	        	docked: 'top',
 	        	title: '密码修改',
+				items: [{
+					text: '保存',
+					ui: 'confirm',
+					action: 'save',
+					handler: function(btn){
+						var psw1 = btn.up('panel').down('passwordfield[itemId=psw1]').getValue().trim(),
+							psw2 = btn.up('panel').down('passwordfield[itemId=psw2]').getValue().trim()
+						console.log(psw1)
+						if(psw1.length<6){
+							Ext.toast('密码长度至少6位',3000)
+							return
+						}
+						if(psw1 != psw2){
+							Ext.toast('确认密码错误',3000)
+							return
+						}
+						// ajax
+						Ext.Ajax.request({
+						    url: Youngshine.app.getApplication().dataUrl + 'updatePsw.php',
+						    params: {
+						        psw1     : psw1,
+								//psw2     : psw2,
+								teacherID: localStorage.teacherID
+						    },
+						    success: function(response){
+						        var text = response.responseText;
+						        // process server response here
+								Ext.toast('密码修改成功',3000)
+								btn.up('panel').destroy()
+						    }
+						});
+					}
+				}]
 			},{
 				xtype: 'fieldset',
 				width: 300,
@@ -74119,7 +74426,7 @@ Ext.define('Youngshine.view.teach.Course', {
 					label : '新密码', //比对确认密码
 					listeners: {
 						focus: function(){
-							this.up('panel').down('button[action=save]').setText('保存')
+							//this.up('panel').down('button[action=save]').setText('保存')
 						},					
 					},
 					scope: this
@@ -74128,56 +74435,15 @@ Ext.define('Youngshine.view.teach.Course', {
 					itemId : 'psw2',
 					//margin: '1 10 0 10',
 					label : '确认密码',
-					listeners: {
-						focus: function(){
-							this.up('panel').down('button[action=save]').setText('保存')
-						},					
-					},
 					scope: this
 				}]	
-			},{
-				xtype: 'button',
-				text: '保存',
-				action: 'save',
-				margin: '-15 10 15',
-				ui: 'confirm',
-				handler: function(){
-					var btnSave = this.up('panel').down('button[action=save]');
-					if(btnSave.getText() != '保存') return false;
-					
-					var psw1 = this.up('panel').down('passwordfield[itemId=psw1]').getValue().trim(),
-						psw2 = this.up('panel').down('passwordfield[itemId=psw2]').getValue().trim()
-					console.log(psw1)
-					if(psw1.length<6){
-						btnSave.setText('密码少于6位')
-						return
-					}
-					if(psw1!= psw2){
-						btnSave.setText('确认密码错误')
-						return
-					}
-					// ajax
-					Ext.Ajax.request({
-					    url: Youngshine.app.getApplication().dataUrl + 'updatePsw.php',
-					    params: {
-					        psw1     : psw1,
-							//psw2     : psw2,
-							teacherID: localStorage.teacherID
-					    },
-					    success: function(response){
-					        var text = response.responseText;
-					        // process server response here
-							btnSave.setText('修改成功')
-					    }
-					});
-				}
 			}],	
 		})
 		this.overlay.show()
 	},	
 	
 	// 开始上课 ，small window-overlay
-	onAddnew: function(){
+	onAddnew: function(btnAddnew){
 		var me = this; 	
 		me.overlay = Ext.Viewport.add({
 			xtype: 'panel',
@@ -74191,26 +74457,45 @@ Ext.define('Youngshine.view.teach.Course', {
 	        items: [{	
 	        	xtype: 'toolbar',
 	        	docked: 'top',
-	        	title: '创建上课课时',
+	        	title: '上课',
 				items: [{
-					text : '╳',
-					handler: function(){
-						this.up('panel').destroy()
+					text : '取消',
+					ui: 'decline',
+					//iconCls: 'delete',
+					handler: function(btn){
+						btn.up('panel').destroy()
 					}
 				},{
 					xtype: 'spacer'
 				},{
-					text : '提交',
+					text : '确定',
 					ui: 'confirm',
 					disabled: true,
 					action: 'save',
 					handler: function(btn){
+						// 判断选择知识点的课时是否超过购买的prepaid.times
+						var prepaidID = Ext.getStore('Zsd').getAt(0).get('prepaidID'),
+							prepaidTimes = Ext.getStore('Zsd').getAt(0).get('times')
+						// getStore('Course') 计算本prepaid的记录数＊2=总课时
+						var usedTimes = 0
+						var storeCourse = Ext.getStore('Course');
+						console.log(storeCourse.getCount()+'条')
+						storeCourse.each(function(record){
+							//console.log(record.data)
+							if(record.data.prepaidID == prepaidID) usedTimes += 1*2
+						})
+						console.log(usedTimes)
+						
+						if(usedTimes >= prepaidTimes){
+							Ext.toast('已经超过订单课时，不能再上课',3000); return
+						}
+						
+						
 						btn.setDisabled(true); //避免重复tap
 						var studentstudyID = this.up('panel').down('selectfield[itemId=zsd]').getValue();
 						console.log(studentstudyID)
 						if (studentstudyID==null || studentstudyID==''){
-							Ext.Msg.alert('请选择知识点');
-							return;
+							Ext.toast('请选择知识点',3000);return;
 						}
 						// ajax
 						Ext.Ajax.request({
@@ -74229,7 +74514,8 @@ Ext.define('Youngshine.view.teach.Course', {
 								},100);
 								//Ext.toast('创建上课成功');
 								// 禁用新增
-								Youngshine.app.getApplication().getController('Teach').getCourse().down('button[action=addnew]').setDisabled(true)
+								btnAddnew.setDisabled(true)
+								//Youngshine.app.getApplication().getController('Teach').getCourse().down('button[action=addnew]').setDisabled(true)
 						    }
 						});
 					}	
@@ -74328,35 +74614,39 @@ Ext.define('Youngshine.view.teach.Course', {
 		})
 		//me.overlay.show()
 		
+		// 选择学生后，显示该学生正在报读知识点
 		function loadZsd(studentID){
-			// 选择学生后，显示该学生正在报读知识点
 			var obj = {
 				"studentID": studentID,
-				"teacherID": localStorage.teacherID
+				"teacherID": sessionStorage.teacherID
 			}
 			var store = Ext.getStore('Zsd'); 
+			store.removeAll(true)
 			store.getProxy().setUrl(Youngshine.app.getApplication().dataUrl + 
 				'readZsdList.php?data='+JSON.stringify(obj) );
 			store.load({ //异步async
 				callback: function(records, operation, success){
 					if (success){
+						console.log(records[0])
 						//Ext.Viewport.setMasked(false);
 						//Ext.Viewport.setActiveItem(me.student);
 						//me.down('selectfield[itemId=zsd]').reset();
 					}else{
 						//me.alertMsg('服务请求失败',3000)
-						Ext.Msg.alert(result.message);
+						Ext.toast('出错',3000);
 					};
 				}   		
 			});
 		}
 		
-		Ext.getStore('Zsd').removeAll(true)
-		// 预先加载的数据
+		// 先清除知识点
+		//Ext.getStore('Zsd').removeAll(true)
+		// 预先加载的数据，成功后显示表单
 		var obj = {
-			"teacherID": localStorage.teacherID,
+			"teacherID": sessionStorage.teacherID,
 		}
 		var store = Ext.getStore('Student'); 
+		store.removeAll(true)
 		store.getProxy().setUrl(Youngshine.app.getApplication().dataUrl + 
 			'readStudentList.php?data='+JSON.stringify(obj) );
 		store.load({ //异步async
@@ -74367,7 +74657,7 @@ Ext.define('Youngshine.view.teach.Course', {
 					me.overlay.show()
 				}else{
 					//me.alertMsg('服务请求失败',3000)
-					Ext.Msg.alert(result.message);
+					Ext.toast('出错',3000);
 				};
 			}   		
 		});	
@@ -76575,7 +76865,7 @@ Ext.define('Youngshine.view.teach.Topic-teach', {
 			store = me.getStore()
 
 		if(store.getCount()>99){
-			Ext.Msg.alert('练习已超过99题');
+			Ext.toast('练习已超过99题',3000);
 			return false
 		}
 		
@@ -76587,7 +76877,7 @@ Ext.define('Youngshine.view.teach.Topic-teach', {
 		
 		for(var i=0;i<store.getCount();i++){
 			if(store.getAt(i).get('done')==0){
-				Ext.Msg.alert('当前题目未做完');
+				Ext.toast('当前题目未做完',3000);
 				return false
 			}
 			done += parseInt( store.getAt(i).get('done') )
@@ -76604,6 +76894,7 @@ Ext.define('Youngshine.view.teach.Topic-teach', {
 					"zsdID": me.getRecord().data.zsdID,
 					"subjectID": me.getRecord().data.subjectID,//知识点按学科分表
 					"studentstudyID": me.getRecord().data.studentstudyID,
+					"courseID": me.getRecord().data.courseID
 				}	
 				console.log(obj)
 				me.fireEvent('fetchTopic',obj)
@@ -76890,5 +77181,5 @@ Ext.define('Youngshine.view.teach.Zsd', {
 });
 
 // @tag full-page
-// @require /Applications/MAMP/htdocs/ghjy_teach/app.js
+// @require /Applications/MAMP/htdocs/ghjy_teach1to1/app.js
 

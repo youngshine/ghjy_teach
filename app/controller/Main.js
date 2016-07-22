@@ -34,8 +34,7 @@ Ext.define('Youngshine.controller.Main', {
 	*/
     loginOk: function(obj,oldView){  	
     	var me = this;
-		Ext.Viewport.setMasked({xtype:'loadmask',message:'正在登录'});
-	console.log(obj)	
+		Ext.Viewport.setMasked({xtype:'loadmask',message:'正在登录'});	
     	Ext.Ajax.request({			
 			url: me.getApplication().dataUrl + 'login.php',
 			//callbackKey: 'callback',
@@ -56,7 +55,7 @@ Ext.define('Youngshine.controller.Main', {
 					
 					// 跳转页面：选择当堂课教授知识点列表
 					//me.showZsd(result.data.teacherID);
-					me.getApplication().getController('Teach').showCourse(ret.data.teacherID);
+					me.getApplication().getController('Teach').courseList(ret.data.teacherID);
 					Ext.Viewport.remove(me.getLogin(),true); // dom remove myself
 					//Ext.Viewport.setActiveItem(Ext.create('Youngshine.view.teach.Zsd'))			
 				}else{
@@ -77,7 +76,8 @@ Ext.define('Youngshine.controller.Main', {
 	logout: function(){
     	Ext.Msg.confirm('',"确认退出？",function(btn){	
 			if(btn == 'yes'){
-				Ext.Viewport.setMasked({xtype:'loadmask',message:'正在注销'});
+				//Ext.Viewport.setMasked({xtype:'loadmask',message:'正在注销'});
+				Ext.toast('正在注销...',6000)
 				window.location.reload();
 			}
 		});
