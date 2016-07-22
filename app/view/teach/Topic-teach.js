@@ -157,7 +157,7 @@ Ext.define('Youngshine.view.teach.Topic-teach', {
 			store = me.getStore()
 
 		if(store.getCount()>99){
-			Ext.Msg.alert('练习已超过99题');
+			Ext.toast('练习已超过99题',3000);
 			return false
 		}
 		
@@ -169,7 +169,7 @@ Ext.define('Youngshine.view.teach.Topic-teach', {
 		
 		for(var i=0;i<store.getCount();i++){
 			if(store.getAt(i).get('done')==0){
-				Ext.Msg.alert('当前题目未做完');
+				Ext.toast('当前题目未做完',3000);
 				return false
 			}
 			done += parseInt( store.getAt(i).get('done') )
@@ -186,6 +186,7 @@ Ext.define('Youngshine.view.teach.Topic-teach', {
 					"zsdID": me.getRecord().data.zsdID,
 					"subjectID": me.getRecord().data.subjectID,//知识点按学科分表
 					"studentstudyID": me.getRecord().data.studentstudyID,
+					"courseID": me.getRecord().data.courseID
 				}	
 				console.log(obj)
 				me.fireEvent('fetchTopic',obj)

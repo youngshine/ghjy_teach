@@ -16,6 +16,7 @@ $res = new Response();
 	$subjectID = $arr->subjectID;
 	$level = $arr->level;
 	$studentstudyID = $arr->studentstudyID;
+	$courseID = $arr->courseID;
 	
 	if($subjectID==1){
 		$table = 'sx_xiaochu_exam_question';
@@ -48,8 +49,8 @@ $res = new Response();
 	while($row = mysql_fetch_array($result)) {
 	    //$topicID = $row["topicID"];
 		$gid = $row["gid"];
-		$query2 = "INSERT INTO `ghjy_topic-teach`(studentstudyID,zsdID,gid) 
-			VALUES( $studentstudyID,$zsdID,'$gid' )";
+		$query2 = "INSERT INTO `ghjy_topic-teach`(courseID,studentstudyID,zsdID,gid) 
+			VALUES( $courseID, $studentstudyID,$zsdID,'$gid' )";
 	    $result2 = mysql_query($query2) 
 			or die("Invalid query: createTopicteach" . mysql_error());		
 		//array_push($query_array,$row);

@@ -305,8 +305,12 @@ Ext.define('Youngshine.controller.Teach', {
 					courseID: rec.data.courseID
 			    },
 			    success: function(response){
-			        //var text = response.responseText;
-			        Ext.getStore('Course').remove(rec); 
+			        var ret = response.responseText;
+					ret = JSON.parse(ret)
+					if(ret.success){
+						Ext.getStore('Course').remove(rec); 
+					}
+			        Ext.toast(ret.message)	
 			    }
 			});
 		}
@@ -325,7 +329,7 @@ Ext.define('Youngshine.controller.Teach', {
 		//Ext.Viewport.setActiveItem(this)
 		//Ext.Viewport.remove(win)
 	},
-	// 返回选择学生，store不变
+	// 返回选择学生，store不变, rec是上级course
 	topicteachPhotos: function(rec,oldView){		
 		var me = this;
 		me.studyphotos = Ext.create('Youngshine.view.teach.Topic-teach-photos')
@@ -349,7 +353,7 @@ Ext.define('Youngshine.controller.Teach', {
 					Ext.Viewport.setActiveItem(me.studyphotos);
 				}else{
 					//me.alertMsg('服务请求失败',3000)
-					Ext.Msg.alert(result.message);
+					Ext.toast(result.message,3000);
 				};
 			}   		
 		});	
@@ -414,7 +418,7 @@ Ext.define('Youngshine.controller.Teach', {
 						window.location.reload();
 					},5000);
 				}else{
-					Ext.Msg.alert(result.message); // 错误模式窗口
+					Ext.toast(result.message,3000); // 错误模式窗口
 				}
 			}
 		});
@@ -446,7 +450,7 @@ Ext.define('Youngshine.controller.Teach', {
 					//store.add(result.data).. store.insert()
 					//console.log(store.data)		
 				}else{
-					Ext.Msg.alert(result.message);
+					Ext.toast(result.message,3000);
 				}
 			},
 		});
@@ -485,7 +489,7 @@ Ext.define('Youngshine.controller.Teach', {
 			},
 			failure: function(){
 				Ext.Viewport.setMasked(false);
-				Ext.Msg.alert('服务请求失败');
+				Ext.toast('服务请求失败',3000);
 			}
 		});	
 	},
@@ -511,7 +515,7 @@ Ext.define('Youngshine.controller.Teach', {
 					record.set('done',done)
 					record.set('fullDone',fullDone)
 				}else{
-					Ext.Msg.alert(result.message); // 错误模式窗口
+					Ext.toast(result.message,3000); // 错误模式窗口
 				}
 			}
 		});
@@ -537,7 +541,7 @@ Ext.define('Youngshine.controller.Teach', {
 			},
 			failure: function(){
 				Ext.Viewport.setMasked(false);
-				Ext.Msg.alert('服务请求失败');
+				Ext.toast('服务请求失败');
 			}
 		});	
 	},
@@ -572,7 +576,7 @@ Ext.define('Youngshine.controller.Teach', {
 					console.log(btnPass)
 					btnPass.setHidden(false) */
 				}else{
-					Ext.Msg.alert(result.message);
+					Ext.toast(result.message,3000);
 				}
 			},
 		});

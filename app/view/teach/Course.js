@@ -14,7 +14,7 @@ Ext.define('Youngshine.view.teach.Course', {
         emptyText: '空白',
 		striped: true,
         itemTpl: [
-			'<div style="color:#888;">{fullDate}｜{studentName}'+
+			'<div style="color:#888;">{fullDate}｜学生：{studentName}'+
 			'<span class="endTime" style="float:right;color:green;">{fullEndtime}</span></div>' + 
 			'<div>{zsdName}</div>'
         ],
@@ -170,10 +170,22 @@ Ext.define('Youngshine.view.teach.Course', {
 					action: 'save',
 					handler: function(btn){
 						// 判断选择知识点的课时是否超过购买的prepaid.times
-						var prepaid = Ext.getStore('Zsd').getAt(0).get('prepaidID')
-						console.log(prepaid)
+						var prepaidID = Ext.getStore('Zsd').getAt(0).get('prepaidID'),
+							prepaidTimes = Ext.getStore('Zsd').getAt(0).get('times')
 						// getStore('Course') 计算本prepaid的记录数＊2=总课时
-						return
+						var usedTimes = 0
+						var storeCourse = Ext.getStore('Course');
+						console.log(storeCourse.getCount()+'条')
+						storeCourse.each(function(record){
+							//console.log(record.data)
+							if(record.data.prepaidID == prepaidID) usedTimes += 1*2
+						})
+						console.log(usedTimes)
+						
+						if(usedTimes >= prepaidTimes){
+							Ext.toast('已经超过订单课时，不能再上课',3000); return
+						}
+						
 						
 						btn.setDisabled(true); //避免重复tap
 						var studentstudyID = this.up('panel').down('selectfield[itemId=zsd]').getValue();
