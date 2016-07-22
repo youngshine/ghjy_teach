@@ -1,9 +1,9 @@
 Ext.define('Youngshine.view.Login', {
-    extend: 'Ext.form.FormPanel',
+    extend: 'Ext.form.Panel',
     xtype: 'login',
 	
     config: {
-        showAnimation: {
+/*        showAnimation: {
             type: "slide",
             direction: "down",
             duration: 300
@@ -13,7 +13,7 @@ Ext.define('Youngshine.view.Login', {
             direction: "up",
             duration: 300
         },
-		
+*/		
 		layout: {
 			type: 'vbox',
 			pack: 'top',
@@ -37,21 +37,21 @@ Ext.define('Youngshine.view.Login', {
 			title: '<div style="color:#888;">根号教育 • 上门家教</div>',
 			style: {
 				maxWidth: '480px',
-				margin: '50px auto 0'
+				margin: '50px auto 0',
+				labelWidth: 65,
 			},
     		items: [{
     			xtype: 'textfield',
 				itemId: 'username',
     			label: '账号',
-				//value: '18150112938',
-				placeHolder: ''
+				placeHolder: '',
+				clearIcon: false
     		},{
     			xtype : 'passwordfield',
-				itemId : 'psw',
+				//itemId : 'psw',
 				label : '密码',
-				value: '123456',
-				//placeHolder: '默认123456'
-			},{
+				clearIcon: false
+/*			},{
 				xtype: 'selectfield',
 				label: '校区', //选择后本地缓存，方便下次直接获取
 				itemId: 'school',
@@ -63,7 +63,13 @@ Ext.define('Youngshine.view.Login', {
 				defaultPhonePickerConfig: {
 					doneButton: '确定',
 					cancelButton: '取消'
-				}
+				} */
+			},{
+				xtype: 'textfield',
+				itemId: 'school',
+    			label: '校区',
+				placeHolder: '输入加盟校区',
+				clearIcon: false
     		}]
     	},{
 			//html: '<br /><div class="forgetpassword" style="float:right;color:#fff;">忘记密码？</div>'
@@ -72,6 +78,7 @@ Ext.define('Youngshine.view.Login', {
 			text : '登录',
 			ui : 'plain',
 			action: 'login',
+			disabled: true,
 			style: {
 				color: '#fff',
 				background: '#66cc00',
@@ -85,6 +92,14 @@ Ext.define('Youngshine.view.Login', {
     		delegate: 'button[action=login]',
     		event: 'tap',
     		fn: 'onLogin'
+		},{
+    		delegate: 'textfield',
+    		event: 'keyup',
+    		fn: 'onSetBtn'	
+		},{
+    		delegate: 'passwordfield',
+    		event: 'change',
+    		fn: 'onSetBtn'
     	},{
 			/*测试用 填入用户和密码
     		delegate: 'button[action=demo]',
@@ -104,27 +119,26 @@ Ext.define('Youngshine.view.Login', {
 	// 控制器Main
     onLogin: function(){
     	// 带入参数：当前表单的用户名和密码
-    	var username = this.down('textfield[itemId=username]').getValue(),
-			psw = this.down('textfield[itemId=psw]').getValue(),
-			//schoolID = this.down('selectfield[itemId=school]').getValue();
-			school = this.down('selectfield[itemId=school]').getValue();
-		console.log(school+username+psw)
-		//if (schoolID==null || schoolID==''){
-		if (school==null || school==''){
-			Ext.Msg.alert('请选择加盟校区');
-			return;
-		}
-		if (username==''){
-			Ext.Msg.alert('请输入账号');
-			return;
-		}
-		if (psw.length<6){
-			Ext.Msg.alert('密码至少6位');
-			return;
-		}	
-	
-    	this.fireEvent('loginOk', username,psw,school);		
+    	var obj = {
+    		"username": this.down('textfield[itemId=username]').getValue().trim(),
+			"psw"     : this.down('passwordfield').getValue().trim(),
+			"school"  : this.down('textfield[itemId=school]').getValue().trim()
+    	}
+    	this.fireEvent('loginOk', obj,this);		
     },	
+
+	onSetBtn: function(){
+		var username = this.down('textfield[itemId=username]').getValue().trim(),
+			psw = this.down('passwordfield').getValue().trim(),
+			school = this.down('textfield[itemId=school]').getValue().trim();
+	
+		var btnLogin = this.down('button[action=login]')	
+		if(username != '' && psw != '' && school != ''){
+			btnLogin.setDisabled(false);
+		}else{
+			btnLogin.setDisabled(true);
+		}				
+	},
 	
 	// 初始化
     initialize: function() {
@@ -135,8 +149,9 @@ Ext.define('Youngshine.view.Login', {
         });
     },
     onPainted: function() {
-		this.down('textfield[itemId=username]').setValue(localStorage.teacherName)
-		this.down('selectfield[itemId=school]').setValue(localStorage.school)
+		console.log(sessionStorage.school)
+		this.down('textfield[itemId=username]').setValue(sessionStorage.teacherName)
+		this.down('textfield[itemId=school]').setValue(sessionStorage.school)
 		//Ext.getCmp('mySchool').setValue(localStorage.school)
     },
 });

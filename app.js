@@ -15,18 +15,17 @@ Ext.application({
 
     requires: [
         'Ext.MessageBox',
-		//'Ext.Toast'
+		'Ext.Toast'
     ],
 
-	dataUrl: 'http://www.xzpt.org/app/teacher-dev/script/', //服务端,全局变量大写???
-	
+	dataUrl: 'http://www.xzpt.org/app/teach1to1/script/', 
 	/*
     views: [
         'Login'
     ], */
 	controllers: [
 		'Main','Teach' 
-		// Main控制器包含处理登录
+		// Main√ä√©√ü√Ç√†‚àÇ√Ç√¥¬Æ√Ç√•√ñ√Ç√™¬¥√Ç¬ß√ë√Å√™√ú√Å√¥¬™√ÇŒ©√Ø
 		//teach includes zsd,student,topic
 	],
     stores: [
@@ -53,9 +52,11 @@ Ext.application({
 
     launch: function() {
         // Destroy the #appLoadingIndicator element
-        //Ext.fly('appLoadingIndicator').destroy();
+        Ext.fly('appLoadingIndicator').destroy();
 
         // Initialize the main view
-        //Ext.Viewport.add(Ext.create('Youngshine.view.Login'));
+		var login = Ext.create('Youngshine.view.Login')
+        Ext.Viewport.add(login); // build?
+		Ext.Viewport.setActiveItem(login);
     },
 });

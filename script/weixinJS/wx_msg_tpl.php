@@ -45,16 +45,17 @@ $wxID = addslashes($_REQUEST['wxID']);
 $student = $_REQUEST['student'];
 $teacher = $_REQUEST['teacher'];
 $zsd = addslashes($_REQUEST['zsd']);
+$courseDate = $_REQUEST['date'];
 //$created = $_REQUEST['created'];
 
-// 教学课后评价提醒模版 
+// 教学课后评价提醒模版，评价页面在公众号wx_ghjy/course_assess.html
 $data = '{
        "touser":"' . $wxID . '",
        "template_id":"w-jfUn6P5GzQvNcUAguC2_v66XK_1WSiemBvUjZDzyc",
-       "url":"http://www.xzpt.org/wx_ghjy/product.html?courseID='.$courseID .'",            
+       "url":"http://www.xzpt.org/wx_ghjy/course_assess.html?courseDate='.$courseDate .'&wxID='.$wxID.'&courseID='.$courseID.'&teacher='.$teacher.'",            
        "data":{
                "first": {
-                   "value":"请对今天上门家教进行评价。",
+                   "value":"今天上门家教已经下课，请对上课教师进行评价。",
                    "color":"#173177"
                },
                "keyword1": {
@@ -70,7 +71,7 @@ $data = '{
                    "color":"#173177"
                },
                "remark":{
-                   "value": "点击进入评价。\n服务电话400-6680-118",
+                   "value": "点击详情进入评价界面。\n服务电话 400-6680-118",
                    "color":"#173177"
                }
        }

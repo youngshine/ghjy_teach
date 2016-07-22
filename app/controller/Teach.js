@@ -70,9 +70,10 @@ Ext.define('Youngshine.controller.Teach', {
 					//Ext.Viewport.remove(me.getLogin(),true); // dom remove myself
 					
 					me.course = Ext.create('Youngshine.view.teach.Course')
-					me.course.down('label[itemId=teacher]').setHtml(localStorage.teacherName)	
-					//viewport.setActiveItem()
+					//me.course.down('label[itemId=teacher]').setHtml(localStorage.teacherName)	
+					me.course.down('toolbar').setTitle(localStorage.teacherName+'老师的课时列表')	
 					Ext.Viewport.add(me.course);
+					Ext.Viewport.setActiveItem(me.course);
 					
 					// 全部下课，才能开始上课
 					Ext.Array.each(records, function(record) {
@@ -187,6 +188,7 @@ Ext.define('Youngshine.controller.Teach', {
 								var obj = {
 									wxID    : rec.data.wxID, // 发消息学生家长
 									courseID: rec.data.courseID,
+									date    : rec.data.created,
 									zsd     : rec.data.zsdName,
 									student : rec.data.studentName,
 									teacher : localStorage.teacherName
@@ -200,7 +202,6 @@ Ext.define('Youngshine.controller.Teach', {
 								        // process server response here
 										console.log(text)//JSON.parse
 										// 下课，发模版信息，退出
-										alert('wait')
 										window.location.reload();
 								    }
 								});
@@ -261,11 +262,17 @@ Ext.define('Youngshine.controller.Teach', {
 			}   		
 		});		
 	},
+	
+	// 向左滑动，删除
 	courseItemswipe: function( list, index, target, record, e, eOpts ){
 		console.log(e);console.log(record)
 		if(e.direction !== 'left') return false
+		
+		// 下课后，不能删除	
+		if(record.data.endTime >'1901-01-01') return false
 			
 		var me = this;
+		list.setDisableSelection(false)
 		list.select(index,true); // 高亮当前记录
 		var actionSheet = Ext.create('Ext.ActionSheet', {
 			items: [{
@@ -283,6 +290,7 @@ Ext.define('Youngshine.controller.Teach', {
 					actionSheet.hide();
 					Ext.Viewport.remove(actionSheet,true); //移除dom
 					list.deselect(index); // cancel高亮当前记录
+					list.setDisableSelection(true)
 				}
 			}]
 		});

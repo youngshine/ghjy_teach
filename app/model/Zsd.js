@@ -13,6 +13,8 @@ Ext.define('Youngshine.model.Zsd', {
 			{name: 'teacherID'}, 
 			{name: 'PDF'}, 
 			{name: 'studentstudyID'}, //报读记录：获得知识点
+			{name: 'times'}, //课时
+			{name: 'prepaidID'} //对应购买订单的总课时
         ]
     }
 });

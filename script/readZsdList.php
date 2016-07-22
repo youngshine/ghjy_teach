@@ -1,5 +1,6 @@
 <?php
-// 教师下面某个学生的正在报读知识点
+// 教师下面某个学生的正在报读知识点，
+// 看该学生本知识点？上课次数是否超过购买课时 prepaid.times
 require_once 'db/response.php';
 require_once 'db/request.php';
 require_once('db/database_connection.php');
@@ -12,11 +13,12 @@ $res = new Response();
 	$teacherID = $arr->teacherID;
 	$studentID = $arr->studentID;
 	
-	$query = "SELECT a.studentstudyID,b.zsdName  
+	$query = "SELECT a.studentstudyID,a.prepaidID,b.zsdName,c.times   
 		From `ghjy_student-study` a 
 		JOIN `ghjy_zsd` b On (a.zsdID=b.zsdID And a.subjectID=b.subjectID) 
+		Join `ghjy_student-prepaid` c On a.prepaidID=c.prepaidID 
 		Where a.teacherID = '$teacherID' And a.studentID=$studentID And 
-			a.pass=0";
+			a.pass=0 ";
     
     $result = mysql_query($query) 
 		or die("Invalid query: readZsdList" . mysql_error());

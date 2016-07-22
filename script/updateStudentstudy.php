@@ -16,10 +16,10 @@ $res = new Response();
 	$studentstudyID = $arr->studentstudyID;
 	$now = date('ymd');
 
-	$query = "UPDATE `ghjy_student-study` SET pass = $pass,pass_date = '$now'  
-		WHERE studentstudyID = $studentstudyID ";
+	$query = "update `ghjy_student-study` set pass = $pass,pass_date = '$now'  
+		where studentstudyID = $studentstudyID ";
 	$result = mysql_query($query) 
-		or die("Invalid query: updateStudentstudy by pass " . mysql_error());
+		or die("Invalid query: updateStudentstudy " . mysql_error());
 	$res->success = true;
 	$res->message = "学生报读知识点studentstudy学习通过成功";
 	$res->data = array();

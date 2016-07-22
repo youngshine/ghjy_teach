@@ -18,6 +18,8 @@ Ext.define('Youngshine.model.Course', {
 			{name: 'level_list'}, // 学生学科初始水平：高中低
 			{name: 'wxID'}, //学生家长微信，公众号发模版消息
 			
+			{name: 'prepaidID'}, //该堂课的知识点归属哪个订单，用于统计课时是否超标
+			
 			{name: 'created'}, // sort by
 			
 			{ name: 'fullDate', convert: function(value, record){

@@ -72827,7 +72827,7 @@ Ext.define('Youngshine.controller.Main', {
 	launch: function(){
 		console.log('main controller launch logic');
 		var me = this;
-		
+/*		
 		//Ext.Viewport.setMasked({xtype:'loadmask',message:'读取加盟校区'});
 		// 预先加载的数据
 		var store = Ext.getStore('School'); 
@@ -72841,23 +72841,15 @@ Ext.define('Youngshine.controller.Main', {
 					Ext.fly('appLoadingIndicator').destroy();
 					
 					// 在这里调用login，才能取得localstorage
-					var view = Ext.create('Youngshine.view.Login');
-					Ext.Viewport.add(view);
-					Ext.Viewport.setActiveItem(view);
+					//var view = Ext.create('Youngshine.view.Login');
+					//Ext.Viewport.add(view);
+					//Ext.Viewport.setActiveItem(view);
 				}else{
 					me.alertMsg('服务请求失败',3000)
-					/*Ext.Viewport.setMasked({
-						xtype: 'loadmask',
-						message: '<div style="padding:50px 20px;color:#fff;">网络错误<br>服务请求失败</div>',
-						indicator: false,
-					});
-					setTimeout(function(){ //延迟，才能滚动到最后4-1
-						Ext.Viewport.setMasked(false);
-					},3000); */
 				};
 			}   		
 		});
-		
+*/		
 	}
     
 });
@@ -73042,7 +73034,33 @@ Ext.define('Youngshine.controller.Teach', {
 					        var text = response.responseText;
 					        //record.set('fullEndtime','')
 							Ext.Viewport.setMasked({xtype:'loadmask',message:'下课了，再见'});
-							window.location.reload();
+							//window.location.reload();
+							// 同时，微信公众号推送模版消息给学生家长
+							
+							wxTpl(record); // 发模版消息，同志学生家长
+							function wxTpl(rec){
+								console.log(rec);
+								var obj = {
+									wxID    : rec.data.wxID, // 发消息学生家长
+									courseID: rec.data.courseID,
+									date    : rec.data.created,
+									zsd     : rec.data.zsdName,
+									student : rec.data.studentName,
+									teacher : localStorage.teacherName
+								}
+								console.log(obj)
+								Ext.Ajax.request({
+								    url: me.getApplication().dataUrl+'weixinJS/wx_msg_tpl.php',
+								    params: obj,
+								    success: function(response){
+								        var text = response.responseText;
+								        // process server response here
+										console.log(text)//JSON.parse
+										// 下课，发模版信息，退出
+										window.location.reload();
+								    }
+								});
+							}
 					    }
 					});
 				}
@@ -73099,15 +73117,20 @@ Ext.define('Youngshine.controller.Teach', {
 			}   		
 		});		
 	},
+	
+	// 向左滑动，删除
 	courseItemswipe: function( list, index, target, record, e, eOpts ){
 		console.log(e);console.log(record)
 		if(e.direction !== 'left') return false
+		
+		// 下课后，不能删除	
+		if(record.data.endTime >'1901-01-01') return false
 			
 		var me = this;
 		list.select(index,true); // 高亮当前记录
 		var actionSheet = Ext.create('Ext.ActionSheet', {
 			items: [{
-				text: '移除当前行',
+				text: '删除当前行',
 				ui: 'decline',
 				handler: function(){
 					actionSheet.hide();
@@ -73759,6 +73782,8 @@ Ext.define('Youngshine.model.Course', {
 			{name: 'studentName'}, 
 			{name: 'studentID'},
 			{name: 'level_list'}, // 学生学科初始水平：高中低
+			{name: 'wxID'}, //学生家长微信，公众号发模版消息
+			
 			{name: 'created'}, // sort by
 			
 			{ name: 'fullDate', convert: function(value, record){
@@ -73809,7 +73834,8 @@ Ext.application({
     name: 'Youngshine',
 
                
-                        
+                         
+		             
       
 
 	dataUrl: 'http://www.xzpt.org/app/teacher-dev/script/', //服务端,全局变量大写???
@@ -73847,10 +73873,10 @@ Ext.application({
 
     launch: function() {
         // Destroy the #appLoadingIndicator element
-        //Ext.fly('appLoadingIndicator').destroy();
+        Ext.fly('appLoadingIndicator').destroy();
 
         // Initialize the main view
-        //Ext.Viewport.add(Ext.create('Youngshine.view.Login'));
+        Ext.Viewport.add(Ext.create('Youngshine.view.Login'));
     },
 });
 
@@ -73859,7 +73885,7 @@ Ext.define('Youngshine.view.Login', {
     xtype: 'login',
 	
     config: {
-        showAnimation: {
+/*        showAnimation: {
             type: "slide",
             direction: "down",
             duration: 300
@@ -73869,7 +73895,7 @@ Ext.define('Youngshine.view.Login', {
             direction: "up",
             duration: 300
         },
-		
+*/		
 		layout: {
 			type: 'vbox',
 			pack: 'top',
@@ -73890,24 +73916,23 @@ Ext.define('Youngshine.view.Login', {
 			}] 
     	},{ */
     		xtype: 'fieldset',
-			title: '<div style="color:#888;">根号教育一对一</div>',
+			title: '<div style="color:#888;">根号教育 • 上门家教</div>',
 			style: {
 				maxWidth: '480px',
-				margin: '50px auto 0'
+				margin: '50px auto 0',
+				labelWidth: 65,
 			},
     		items: [{
     			xtype: 'textfield',
 				itemId: 'username',
     			label: '账号',
-				//value: '18150112938',
 				placeHolder: ''
     		},{
     			xtype : 'passwordfield',
 				itemId : 'psw',
 				label : '密码',
-				value: '123456',
 				//placeHolder: '默认123456'
-			},{
+/*			},{
 				xtype: 'selectfield',
 				label: '校区', //选择后本地缓存，方便下次直接获取
 				itemId: 'school',
@@ -73919,7 +73944,12 @@ Ext.define('Youngshine.view.Login', {
 				defaultPhonePickerConfig: {
 					doneButton: '确定',
 					cancelButton: '取消'
-				}
+				} */
+			},{
+				xtype: 'textfield',
+				itemId: 'school',
+    			label: '校区',
+				placeHolder: '输入加盟校区'
     		}]
     	},{
 			//html: '<br /><div class="forgetpassword" style="float:right;color:#fff;">忘记密码？</div>'
@@ -73963,11 +73993,11 @@ Ext.define('Youngshine.view.Login', {
     	var username = this.down('textfield[itemId=username]').getValue(),
 			psw = this.down('textfield[itemId=psw]').getValue(),
 			//schoolID = this.down('selectfield[itemId=school]').getValue();
-			school = this.down('selectfield[itemId=school]').getValue();
+			school = this.down('textfield[itemId=school]').getValue();
 		console.log(school+username+psw)
 		//if (schoolID==null || schoolID==''){
 		if (school==null || school==''){
-			Ext.Msg.alert('请选择加盟校区');
+			Ext.Msg.alert('加盟校区不能空白');
 			return;
 		}
 		if (username==''){
@@ -73992,7 +74022,7 @@ Ext.define('Youngshine.view.Login', {
     },
     onPainted: function() {
 		this.down('textfield[itemId=username]').setValue(localStorage.teacherName)
-		this.down('selectfield[itemId=school]').setValue(localStorage.school)
+		this.down('textfield[itemId=school]').setValue(localStorage.school)
 		//Ext.getCmp('mySchool').setValue(localStorage.school)
     },
 });

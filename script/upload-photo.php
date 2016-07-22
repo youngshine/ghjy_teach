@@ -1,8 +1,9 @@
 <?php
 
 /*  上传图片＋插入数据库  */
-
+header('Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept');
 header('Access-Control-Allow-Origin: *'); // 跨域问题
+//header('Access-Control-Allow-Headers: X-Requested-With');
 
     //include_once('saestorage.class.php'); //新浪云平台存储组件API
 	require_once('db/database_connection.php');
@@ -44,7 +45,7 @@ header('Access-Control-Allow-Origin: *'); // 跨域问题
 			"studyphotoID" => $id,
 			"photo" => $fullName,//$newName,
 			"studentstudyID" => $studentstudyID,
-			"created": date('ymdhis')
+			//"created": date('ymdhis') //跨域问题
 		));	
 	}
 

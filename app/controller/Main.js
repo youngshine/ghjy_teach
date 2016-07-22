@@ -32,45 +32,41 @@ Ext.define('Youngshine.controller.Main', {
 	2)抓取未读信息列表（定期）
 	3)获得当前地理位置，发给服务端 （定期）
 	*/
-    loginOk: function(username,psw,school){  	
+    loginOk: function(obj,oldView){  	
     	var me = this;
 		Ext.Viewport.setMasked({xtype:'loadmask',message:'正在登录'});
-		
-    	Ext.data.JsonP.request({			
+	console.log(obj)	
+    	Ext.Ajax.request({			
 			url: me.getApplication().dataUrl + 'login.php',
-			callbackKey: 'callback',
-			timeout: 10000,
-			params:{
-				data: '{"username":"' + username + '","psw":"' + psw + '","school":"' + school + '"}'
-			},
-			success: function(result){ // 服务器连接成功
-				/* 登录成功后 
-				   1)CarpoolGlobal.MemberInfo.Member_ID改变值 2)未读消息 3）位置信息 */
-				//myMsgbox.hide(); //关闭提示窗口  
+			//callbackKey: 'callback',
+			//timeout: 14000,
+			params: obj,
+			success: function(response){ // 服务器连接成功
 				Ext.Viewport.setMasked(false); 
-				if (result.success){ // 返回值有success成功
-					console.log(result.data)
-					//localStorage.setItem('isLogin',true); // 登录状态
-					localStorage.setItem('teacherID',result.data.teacherID);
-					localStorage.setItem('teacherName',result.data.teacherName);
-					localStorage.setItem('school',result.data.schoolName); // not schoolID
+				var ret = JSON.parse(response.responseText)
+				console.log(ret)
+				if (ret.success){ // 返回值有success成功
+					console.log(ret.data)
+					sessionStorage.setItem('teacherID',ret.data.teacherID);
+					sessionStorage.setItem('teacherName',ret.data.teacherName);
+					sessionStorage.setItem('school',ret.data.schoolName); // not schoolID
 					 // 会员id保存在localstorage，app.js, logout退出到登录界面用？4.4
 
 					// 登录成功，发送地理位置，给服务器 600秒一次？
 					
 					// 跳转页面：选择当堂课教授知识点列表
 					//me.showZsd(result.data.teacherID);
-					me.getApplication().getController('Teach').showCourse(result.data.teacherID);
+					me.getApplication().getController('Teach').showCourse(ret.data.teacherID);
 					Ext.Viewport.remove(me.getLogin(),true); // dom remove myself
-					//Ext.Viewport.setActiveItem(Ext.create('Youngshine.view.teach.Zsd'));  					
+					//Ext.Viewport.setActiveItem(Ext.create('Youngshine.view.teach.Zsd'))			
 				}else{
-					Ext.Msg.alert(result.message);
+					Ext.toast(ret.message,3000);
 				}
 			},
 			failure: function(){
 				//myMsgbox.hide();
 				Ext.Viewport.setMasked(false);
-				Ext.Msg.alert('服务请求失败');
+				Ext.toast('服务请求失败',3000);
 			}
 		});
 	},
@@ -87,23 +83,11 @@ Ext.define('Youngshine.controller.Main', {
 		});
 	},
 	
-	// 公用提示，2秒自动消失
-	alertMsg: function(msg,timeLength){
-		Ext.Viewport.setMasked({
-			xtype: 'loadmask',
-			message: '<div style="padding:10px 15px;color:#fff;background:#777;">' + msg + '</div>',
-			indicator: false,
-		});
-		setTimeout(function(){ //延迟，才能滚动到最后4-1
-			Ext.Viewport.setMasked(false);
-		},timeLength);
-	},
-	
 	// controller launch Called by the Controller's application immediately after the Application's own launch function has been called. This is usually a good place to run any logic that has to run after the app UI is initialized. 
 	launch: function(){
 		console.log('main controller launch logic');
 		var me = this;
-		
+/*		
 		//Ext.Viewport.setMasked({xtype:'loadmask',message:'读取加盟校区'});
 		// 预先加载的数据
 		var store = Ext.getStore('School'); 
@@ -117,23 +101,15 @@ Ext.define('Youngshine.controller.Main', {
 					Ext.fly('appLoadingIndicator').destroy();
 					
 					// 在这里调用login，才能取得localstorage
-					var view = Ext.create('Youngshine.view.Login');
-					Ext.Viewport.add(view);
-					Ext.Viewport.setActiveItem(view);
+					//var view = Ext.create('Youngshine.view.Login');
+					//Ext.Viewport.add(view);
+					//Ext.Viewport.setActiveItem(view);
 				}else{
 					me.alertMsg('服务请求失败',3000)
-					/*Ext.Viewport.setMasked({
-						xtype: 'loadmask',
-						message: '<div style="padding:50px 20px;color:#fff;">网络错误<br>服务请求失败</div>',
-						indicator: false,
-					});
-					setTimeout(function(){ //延迟，才能滚动到最后4-1
-						Ext.Viewport.setMasked(false);
-					},3000); */
 				};
 			}   		
 		});
-		
+*/		
 	}
     
 });
