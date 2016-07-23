@@ -31,22 +31,23 @@ Ext.define('Youngshine.view.teach.Course', {
 					Youngshine.app.getController('Main').logout()
 				}
 			},{
-				//text : '设置',
-				iconCls: 'settings',
-				handler: function(){
-					this.up('list').onSetup()
-				}
-			},{
 				xtype: 'spacer'
 			},{
-				text : '＋新增上课',
-				//iconCls: 'settings',
-				ui: 'action',
-				action: 'addnew',
+				//text : '＋新增上课',
+				iconCls: 'settings',
+				//ui: 'action',
+				//action: 'addnew',
 				handler: function(btn){
-					btn.up('list').onAddnew(btn)
+					btn.up('list').onSetup(btn)
 				}	
 			}]
+		},{
+    		xtype: 'label',
+			scrollDock: 'top',
+			docked: 'top',
+			html: '<span class="addnew">＋新增上课</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="hist">已通过学习的</span>',
+			//itemId: 'zsd',
+			style: 'text-align:center;color:green;'
 /*		},{
 			xtype: 'label',
 			docked: 'top',
@@ -54,6 +55,17 @@ Ext.define('Youngshine.view.teach.Course', {
 			itemId: 'teacher',
 			style: 'text-align:center;color:#888;font-size:0.9em;margin:5px;' */
     	}],
+		listeners: [{
+			element: 'element',
+			delegate: 'span.addnew',
+			event: 'tap',
+			fn: 'onAddnew'
+		},{
+			element: 'element',
+			delegate: 'span.hist',
+			event: 'tap',
+			fn: 'onHist'	
+		}],
     },
 	
 	// 设置密码 ，small window-overlay
@@ -141,6 +153,21 @@ Ext.define('Youngshine.view.teach.Course', {
 	// 开始上课 ，small window-overlay
 	onAddnew: function(btnAddnew){
 		var me = this; 	
+		
+		// 全部下课，才能开始上课
+		var endTime = true;
+		var store = me.getStore()
+		store.each(function(record){
+		    console.log(record.data.endTime)
+			if(record.data.endTime < '1901-01-01'){
+				//me.course.down('button[action=addnew]').setDisabled(true)
+				Ext.toast('请先下课',3000)
+				endTime = false
+				return  // exit loop
+			}
+		})
+		if(!endTime) return
+		
 		me.overlay = Ext.Viewport.add({
 			xtype: 'panel',
 			modal: true,

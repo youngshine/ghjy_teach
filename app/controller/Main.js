@@ -51,13 +51,9 @@ Ext.define('Youngshine.controller.Main', {
 					sessionStorage.setItem('school',ret.data.schoolName); // not schoolID
 					 // 会员id保存在localstorage，app.js, logout退出到登录界面用？4.4
 
-					// 登录成功，发送地理位置，给服务器 600秒一次？
-					
-					// 跳转页面：选择当堂课教授知识点列表
-					//me.showZsd(result.data.teacherID);
-					me.getApplication().getController('Teach').courseList(ret.data.teacherID);
 					Ext.Viewport.remove(me.getLogin(),true); // dom remove myself
-					//Ext.Viewport.setActiveItem(Ext.create('Youngshine.view.teach.Zsd'))			
+					// 跳转页面：选择当堂课教授知识点列表	
+					me.getApplication().getController('Teach').courseList(ret.data.teacherID);		
 				}else{
 					Ext.toast(ret.message,3000);
 				}

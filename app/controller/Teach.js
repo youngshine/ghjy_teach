@@ -76,8 +76,7 @@ Ext.define('Youngshine.controller.Teach', {
 					me.course.down('toolbar').setTitle(sessionStorage.teacherName+'老师的上课列表')	
 					Ext.Viewport.add(me.course);
 					Ext.Viewport.setActiveItem(me.course);
-					Ext.Viewport.remove(me.getLogin(),true); // dom remove myself
-					
+					/*
 					// 全部下课，才能开始上课
 					Ext.Array.each(records, function(record) {
 					    console.log(record.data)
@@ -85,9 +84,9 @@ Ext.define('Youngshine.controller.Teach', {
 							me.course.down('button[action=addnew]').setDisabled(true)
 							return false
 						}
-					});
+					}); */
 				}else{
-					me.aler('服务请求失败',3000); // toast 1000
+					Ext.toast('服务请求失败',3000); // toast 1000
 				};
 			}   		
 		});
